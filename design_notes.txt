@@ -1,0 +1,78 @@
+Open Questions
+
+1. what classes should be included?
+	game class
+	board class
+	piece class
+	(maybe) a class for each type of piece? <gut here is saying yes, they can inherit from piece class. 
+	This will allow each piece to have a more lightweight array of available moves, since it will not 
+	have to carry around the available moves of each of the other pieces. 
+
+
+
+2. how do you check that a move is legal?
+	- approach 1:
+		- start with all the possible moves by a piece on a blank board, stored in an array
+		- loop through each move and remove illegal moves:
+			- moves that are off the board
+			- moves that clash with own team
+			- moves that put own team into check
+
+			question 2a. Is this an egregious amount of calculating?
+			do a worst case scenario analysis:
+				32 pieces to start with
+				only have to analyze the given piece
+				in fact, you only have to analyze the given move - no need to generate every possible move!
+
+				this unique movement by each piece furthers the argument for each piece having its own class
+					need to do a quick review of inheritance...
+
+
+3. how do you store the legal moves for a given piece? -> see #2a decision to make each piece its own class
+
+4. what are the class and super class attributes and methods? In fact, outline all classes and what they should do here:
+
+	Board Class
+		check for check condition
+		keeps track of movement history (would be really cool if you could load and save games from actual chess files, which is a thing)
+		? does it need a custom data structure, or is a nested array as good as it gets? hash table? Something in my mind thinks that a hash would be nice since its 'flat'. Not sure if this is a valid reason to prefer them though, seeing as you will still need to enter the row/column combination in the same way each time. But this way you could more easily index one or the other with letters as they do in real chess, ie a7 to b4 (this is called file for the letters)
+			? how do you pass specific objects into a hash 
+
+	Piece Class
+		assign symbol method
+		counting pieces?
+
+	Sub Piece
+		team 
+		type
+		text representation
+		symbol
+		movement pattern
+		check (king only) -> this is actually a board condition
+
+
+		Pawn Class
+
+			start with pawn and deal with character-specific movements
+				can never move forward if a piece occupies the next spot up
+				can move 1 or 2 if its the piece's first time moving
+
+		King Class
+
+		An aside: quick way to check for check condition
+			1. scan all spaces immediately surrounding the king
+				if they are either OOB or own team, then continue;
+				if they are blank, search out in the direction of the blankness until another piece or a wall is detected
+
+
+	# how to keep track of moves?
+# three cases:
+# discrete movers (knights)
+# continuous movers (rooks, bishops, queens)
+# conditional movers (king, pawn)
+# technically, they are all conditional movers, as an piece could move in a way that would cause check
+# which class should be responsible for making sure that a move doesn't move the king into check?
+
+# Where the game is right now:
+# display board
+# get a player to move
