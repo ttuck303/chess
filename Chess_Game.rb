@@ -1,3 +1,6 @@
+require_relative 'Board'
+require_relative 'Piece'
+
 class Chess_Game
 	attr_accessor :active_player
 
@@ -116,3 +119,7 @@ class Chess_Game
 	end
 
 end
+
+
+g = Chess_Game.new
+g.game_loop

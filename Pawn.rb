@@ -6,7 +6,6 @@ class Pawn < Piece
 		super
 		@type = :pawn 
 		@symbol = assign_symnol
-	
 	end
 
 	def assign_symnol
@@ -20,6 +19,4 @@ class Pawn < Piece
 		end
 	end
 
-
-	
 end
