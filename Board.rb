@@ -22,11 +22,6 @@ class Board
 		@board[space] = obj
 	end
 
-	def idx_conversion #convert a hash key from format of @# to 
-	end
-
-
-
 	def populate_board #TO DO: refactor to be more concise
 		for i in 'a'..'h'
 			populate_space((i+'2').to_sym, Pawn.new('white'))
@@ -58,16 +53,47 @@ class Board
 
 	end
 
+	def get_column(space)
+		space.to_s[0]
+	end
+
+	def get_row(space)
+		space.to_s[1]
+	end
+
+	def what_to_display(input)
+		input.nil? ? (return " _ ") : (return (" "+input.symbol+" "))
+	end
+
+
 	def display_board
-		@board.each_with_index do |row, idx|
-			rowout = idx.to_s
-			row.each do |space|
-				space.empty? ? (rowout << " _ ") : (rowout << (" " + space[0].symbol+" "))
+		row1, row2, row3, row4, row5, row6, row7, row8 = '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ' ,'8 '
+		@board.each do |key, value|
+			row = get_row(key).to_i
+			case row
+			when 1
+				row1 << what_to_display(value)
+			when 2
+				row2 << what_to_display(value)
+			when 3
+				row3 << what_to_display(value)
+			when 4
+				row4 << what_to_display(value)
+			when 5
+				row5 << what_to_display(value)
+			when 6
+				row6 << what_to_display(value)
+			when 7
+				row7 << what_to_display(value)
+			when 8
+				row8 << what_to_display(value)
 			end
-			puts rowout
 		end
-		puts "  0  1  2  3  4  5  6  7  "
-		puts "        (Columns)         "
+
+		puts row8, row7, row6, row5, row4, row3, row2, row1
+		puts
+		puts "   A  B  C  D  E  F  G  H  "
+		puts "          (Columns)         "
 		return nil
 	end
 

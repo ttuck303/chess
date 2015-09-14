@@ -76,3 +76,26 @@ Open Questions
 # Where the game is right now:
 # display board
 # get a player to move
+
+
+____
+
+
+Update 2015-09-14
+
+As I work to convert the board to a hash, I am wondering if this is an intelligent / justified move. 
+Displaying is certainly more complicated in this set up. 
+Moving or checking spaces requires more legwork, whereas a nested array has built in structure that seems more beneficial - being able to scan a spot
+
+Advantages of Hash Board
+- spaces are named
+	- allowing you to keep track of moves
+	- preventing ambiguity when entering moves
+- can more cleanly populate a board during initialization
+
+
+
+Advantages of Nested Array Board
+
+
+
