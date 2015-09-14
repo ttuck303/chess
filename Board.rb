@@ -1,11 +1,17 @@
 require_relative 'Pawn'
+require_relative 'Rook'
+require_relative 'knight'
+require_relative 'Bishop'
+require_relative 'Queen'
+require_relative 'King'
+
 
 class Board
 	attr_accessor :board
 
 	def initialize
 		@board = blank_board
-		populate_board
+		populate_new_board
 	end
 
 	def blank_board
@@ -22,35 +28,29 @@ class Board
 		@board[space] = obj
 	end
 
-	def populate_board #TO DO: refactor to be more concise
+	def populate_new_board #TO DO: refactor to be more concise
 		for i in 'a'..'h'
 			populate_space((i+'2').to_sym, Pawn.new('white'))
 			populate_space((i+'7').to_sym, Pawn.new('black'))
 		end
+		populate_space(:a1, Rook.new('white'))
+		populate_space(:b1, Knight.new('white'))
+		populate_space(:c1, Bishop.new('white'))
+		populate_space(:d1, Queen.new('white'))
+		populate_space(:e1, King.new('white'))
+		populate_space(:f1, Bishop.new('white'))
+		populate_space(:g1, Knight.new('white'))
+		populate_space(:h1, Rook.new('white'))
 
-=begin 
-		@board[0][0] << Piece.new('black', 'rook')
-		@board[0][7] << Piece.new('black', 'rook')
-		@board[7][0] << Piece.new('white', 'rook')
-		@board[7][7] << Piece.new('white', 'rook')
-
-		@board[0][1] << Piece.new('black', 'knight')
-		@board[0][6] << Piece.new('black', 'knight')
-		@board[7][1] << Piece.new('white', 'knight')
-		@board[7][6] << Piece.new('white', 'knight')
-
-		@board[0][2] << Piece.new('black', 'bishop')
-		@board[0][5] << Piece.new('black', 'bishop')
-		@board[7][2] << Piece.new('white', 'bishop')
-		@board[7][5] << Piece.new('white', 'bishop')
-
-		@board[0][3] << Piece.new('black', 'queen')
-		@board[0][4] << Piece.new('black', 'king')
-
-		@board[7][3] << Piece.new('white', 'queen')
-		@board[7][4] << Piece.new('white', 'king')
-=end
-
+		populate_space(:a8, Rook.new('black'))
+		populate_space(:b8, Knight.new('black'))
+		populate_space(:c8, Bishop.new('black'))
+		populate_space(:d8, Queen.new('black'))
+		populate_space(:e8, King.new('black'))
+		populate_space(:f8, Bishop.new('black'))
+		populate_space(:g8, Knight.new('black'))
+		populate_space(:h8, Rook.new('black'))
+		return nil
 	end
 
 	def get_column(space)
