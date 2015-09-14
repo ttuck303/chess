@@ -1,3 +1,5 @@
+require_relative 'Pawn'
+
 class Board
 	attr_accessor :board
 
@@ -7,23 +9,31 @@ class Board
 	end
 
 	def blank_board
-		board = []
-		for i in 0..7
-			row = []
-			for j in 0..7
-				row << Array.new()
+		board = {}
+		for i in Range.new('a', 'h')
+			for j in Range.new(1, 8)
+				board[(i+j.to_s).to_sym] = nil
 			end
-			board << row
 		end
 		board
 	end
 
+	def populate_space(space, obj)
+		@board[space] = obj
+	end
+
+	def idx_conversion #convert a hash key from format of @# to 
+	end
+
+
 
 	def populate_board #TO DO: refactor to be more concise
-		for i in 0..7
-			@board[1][i] << Piece.new('black', 'pawn')
-			@board[6][i] << Piece.new('white', 'pawn')
+		for i in 'a'..'h'
+			populate_space((i+'2').to_sym, Pawn.new('white'))
+			populate_space((i+'7').to_sym, Pawn.new('black'))
 		end
+
+=begin 
 		@board[0][0] << Piece.new('black', 'rook')
 		@board[0][7] << Piece.new('black', 'rook')
 		@board[7][0] << Piece.new('white', 'rook')
@@ -44,6 +54,7 @@ class Board
 
 		@board[7][3] << Piece.new('white', 'queen')
 		@board[7][4] << Piece.new('white', 'king')
+=end
 
 	end
 

@@ -1,10 +1,8 @@
 class Piece
 	attr_accessor :team, :type, :symbol
 
-	def initialize(team, type)
-		@type = type.to_sym
+	def initialize(team)
 		@team = team.to_sym
-		@symbol = assign_symbol(@team, @type)
 	end
 
 	def assign_symbol(team, type)

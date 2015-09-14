@@ -7,4 +7,3 @@ g = Chess_Game.new
 g.game_loop
 
 
-

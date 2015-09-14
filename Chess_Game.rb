@@ -13,9 +13,6 @@ class Chess_Game
 		confirm_piece_selection
 		desired_move = enter_desired_move
 		confirm_legal_move(desired_move)
-		
-
-		
 
 		if acceptable_end_location?(move_row, move_column)
 			# do stuff
