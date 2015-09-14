@@ -10,36 +10,23 @@ class Chess_Game
 	end
 
 	def get_player_move
-
-		
-
-		# enter a move for that piece
-		
-		# check that the piece selection is valid (on the board, piece in the spot, piece on the correct team)
-		selected_piece = select_a_piece
+		piece = select_a_piece
 		confirm_piece_selection
-		desired_move = enter_desired_move
-		confirm_legal_move(desired_move)
-
-		if acceptable_end_location?(move_row, move_column)
-			# do stuff
-			puts "Move #{piece.type} to #{move_row},#{move_column}"
-		else
-			puts "Illegal move. Please try again."
+		move = enter_desired_move
+		unless legal_move?(piece, move)
+			until legal_move?(piece, move)
+				move = enter_desired_move
+			end
 		end
-
-		# confirm with the player that this is the piece they want, or offer for them to select another piece
-		# request the move that the player wants to make
-		# check that this move is acceptable
-		# update board with player move
+		[piece, move] # return a piece and the legal move
 	end
 
 	def select_a_piece
-		puts "Select a piece to move (e.g. 'a1' or 'c3')"
+		puts "Select a piece to move (e.g. 'a1' thru 'h8')"
 		choice = gets.strip.to_sym
 		piece = nil
 	
-		if !selection_is_on_board?(choice) 					# check that the space entry is legit
+		if !on_board?(choice) 					# check that the space entry is legit
 			puts "Selection #{choice} is not on game board. Please try again."
 			select_a_piece
 		elsif !space_occupied?(choice) 						# check that the space is occupied
@@ -49,41 +36,53 @@ class Chess_Game
 			puts "That's not your team!"
 			select_a_piece
 		else
-			piece = @game_board[choice]
+			piece = @game_board.board[choice]
 			puts "You have selected #{piece.type} in space #{choice.to_s}."
 		end
 		piece
 	end
 
 	def confirm_piece_selection
-		puts "If this is correct? [y/n]"
+		puts "Is this is correct? [y/n]"
 		confirmation = gets.strip.downcase
 		get_player_move unless confirmation == 'y'
 	end
 
 	def enter_desired_move
-		puts "Select where to move by entering the row and column seperated by a space."
-		move = gets.strip
-		return [move[0], move[-1]]
+		puts "Where do you want to move?"
+		choice = gets.strip.to_sym
 	end
 
-	def confirm_legal_move(move_arr)
-		#checks if move is legal
-		#if so, continue
-		# if not, explain why and force another selection
+	def legal_move?(piece, move)
+		if !on_board?(move)				# check that the move is on the board
+			puts "The space you have selected is not on the board. Please try again."
+			return false
+		elsif space_occupied?(move) && selection_is_on_active_team?(move)   	# check that the desired space is not occupied by a teammate
+			puts "That space is occupied by your team. Please try again."
+			return false
+		elsif 		
+	
+		# check that the move abides by the piece's move rules
+			# check acceptable "difference" in row and column
+			# check the piece is not "flying" over other pieces
+			# edge cases:
+				# knights can fly
+				# rook / king can castle
+				# pawn can move 2 on first go
+				# pawn can take an opponent in a diagonal spot
+				# check that the move would not move the King into check
 	end
 
-
-	def selection_is_on_board?(selection)
-		@game_board.has_key?(choice)
+	def on_board?(selection)
+		@game_board.board.has_key?(selection)
 	end
 
 	def space_occupied?(selection)
-		!@game_board[selection].nil?
+		!@game_board.board[selection].nil?
 	end
 
-	def selection_is_on_active_team(selection)
-		@game_board[selection].team == @active_player
+	def selection_is_on_active_team?(selection)
+		@game_board.board[selection].team == @active_player
 	end
 
 

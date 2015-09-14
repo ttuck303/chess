@@ -98,4 +98,10 @@ Advantages of Hash Board
 Advantages of Nested Array Board
 
 
+----
+
+How do you represent a kind of piece's acceptable move patterns?
+	idea 1: create acceptable x-y differences from start to finish, and check for edge cases in a seperate method
+
+
 
