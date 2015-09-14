@@ -100,11 +100,11 @@ class Board
 	end
 
 	def calculate_x_difference(space_1, space_2)
-		(letter_to_number(space_2) - letter_to_number(space1)).abs
+		(letter_to_number(space_2) - letter_to_number(space1))
 	end
 
 	def calculate_y_difference(space_1, space_2)
-		(space_2 - space1).abs
+		(space_2 - space1)
 	end
 
 	def letter_to_number(letter)
@@ -114,6 +114,8 @@ class Board
 	def number_to_letter(number)
 		NUM_2_LET[letter]
 	end
+
+	
 
 
 end

@@ -60,7 +60,9 @@ class Chess_Game
 		elsif space_occupied?(move) && selection_is_on_active_team?(move)   	# check that the desired space is not occupied by a teammate
 			puts "That space is occupied by your team. Please try again."
 			return false
-		elsif 		
+		#elsif 	
+			#do stuff	
+		end
 	
 		# check that the move abides by the piece's move rules
 			# check acceptable "difference" in row and column
@@ -86,7 +88,7 @@ class Chess_Game
 	end
 
 
-	def acceptable_end_location?
+	def acceptable_end_location?(origin, destination)
 		if move_out_of_bounds?
 			puts "Illegal move: cannot move is off the board."
 			return false
@@ -96,9 +98,16 @@ class Chess_Game
 		elsif own_piece_in_the_way?
 			puts "Illegal move: your own piece is in the way."
 			return false
+		elsif destination_same_as_origin?(origin, destination)
+			puts "You must move the piece to a new space."
+			return false
 		else
 			return true
 		end
+	end
+
+	def destination_same_as_origin?(origin, destination)
+		origin == destination
 	end
 
 	def move_out_of_bounds?
@@ -124,6 +133,21 @@ class Chess_Game
 
 	def load_game
 	end
+
+	def end_game_condition
+	end
+
+	def special_case_check(piece, start, move)
+		case piece
+		when :pawn
+			# if move differential is 1,1, check that there is an enemy in that spot
+			# if pawn moves into last space, generate new piece for that team
+		end
+
+
+
+	end
+
 
 end
 

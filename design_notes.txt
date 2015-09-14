@@ -102,6 +102,14 @@ Advantages of Nested Array Board
 
 How do you represent a kind of piece's acceptable move patterns?
 	idea 1: create acceptable x-y differences from start to finish, and check for edge cases in a seperate method
+		note: direcitonality matters in some cases (pawns). Directionality is dependent on the color and board set up. Assuming board is the same every time, so I can use true value of y difference. 
+
+
+		Pawn Movements and Special Cases
+				# if white, move up; if black, move down
+				# if first move, allowed to go 2, otherwise just 1
+				# if enemy diagonal, allowed to move diagonally and take
+				# if reach the end, become any piece the user wants
 
 
 
