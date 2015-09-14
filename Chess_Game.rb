@@ -9,7 +9,11 @@ class Chess_Game
 		@game_board = Board.new
 	end
 
-	def get_player_move #TO DO huge ugly method. break it into more pieces
+	def get_player_move
+
+		
+
+		# enter a move for that piece
 		
 		# check that the piece selection is valid (on the board, piece in the spot, piece on the correct team)
 		selected_piece = select_a_piece
@@ -31,17 +35,22 @@ class Chess_Game
 	end
 
 	def select_a_piece
-		puts "Select one of your pieces by entering the row and the column, seperated by a space."
-		choice = gets.strip
-		row = choice[0].to_i
-		column = choice[-1].to_i
+		puts "Select a piece to move (e.g. 'a1' or 'c3')"
+		choice = gets.strip.to_sym
 		piece = nil
-		if valid_piece_selection?(row, column)
-			piece = @game_board.occupant(row, column) 
-			puts "You have selected to move #{piece.type} in row#{row}, column #{column}."
-		else
-			puts "Invalid selection, please select again."
+	
+		if !selection_is_on_board?(choice) 					# check that the space entry is legit
+			puts "Selection #{choice} is not on game board. Please try again."
 			select_a_piece
+		elsif !space_occupied?(choice) 						# check that the space is occupied
+			puts "There is no piece in the space. Please try again."
+			select_a_piece
+		elsif !selection_is_on_active_team?(choice) 		# check that the piece belongs to the active player's team
+			puts "That's not your team!"
+			select_a_piece
+		else
+			piece = @game_board[choice]
+			puts "You have selected #{piece.type} in space #{choice.to_s}."
 		end
 		piece
 	end
@@ -65,17 +74,16 @@ class Chess_Game
 	end
 
 
-	def valid_piece_selection?(row, column)
-		return true
+	def selection_is_on_board?(selection)
+		@game_board.has_key?(choice)
 	end
 
-	def selection_is_on_board?(row, column)
-		(0..7).include?(row) && (0..7).include?(column)
+	def space_occupied?(selection)
+		!@game_board[selection].nil?
 	end
 
-	def selection_is_on_active_team(row, column)
-		space_occupant = @game_board.occupant(row, column)
-		space_occupant.team == @active_player
+	def selection_is_on_active_team(selection)
+		@game_board[selection].team == @active_player
 	end
 
 
