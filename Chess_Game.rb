@@ -16,7 +16,7 @@ class Chess_Game
 		temp = select_a_piece
 		piece = temp[0]
 		origin = temp[1]
-		confirm_piece_selection
+		#confirm_piece_selection
 		move = enter_desired_move
 		until legal_move?(piece, origin, move)
 			move = enter_desired_move
@@ -70,13 +70,13 @@ class Chess_Game
 		elsif space_occupied?(move) && selection_is_on_active_team?(move)   	# check that the desired space is not occupied by a teammate
 			puts "That space is occupied by your team. Please try again."
 			return false
-		elsif !legal_piece_specific_move?(piece, origin, move)
+		elsif !legal_piece_specific_move?(piece, origin, move)  # check that the move abides by the piece's move rules (on an open board)
 			return false
 		else
 			return true
 		end
 	 
-		# check that the move abides by the piece's move rules
+		
 			# check acceptable "difference" in row and column
 			# check the piece is not "flying" over other pieces
 			# edge cases:
@@ -179,6 +179,19 @@ class Chess_Game
 
 	def number_to_letter(number)
 		NUM_2_LET[letter]
+	end
+
+	def spaces_between(origin, move) #returns all the spaces in a direct line between the origin and the move
+		#case 1 straight and vertical -> can tell because same column (letter from each space is same)
+			# do: iterate over the numbers between the two end points
+		#case 2 straight and horizontal -> can tell because same row (number from each space is same)
+			# do: convert the letters to numbers, iterate over the range, convert those numbers back to letters
+
+		# can tell diagonal because x_diff = y_diff
+		#case 3 diagonal to the upper right -> can tell because y_diff > 0
+			# do: convert letters to numbers, iterate over group, return those column numbers to letters
+		#case 4 diagonal to the lower left ->  can tell because y_diff < 0 
+			# do: convert letters to numbers, iterate over group, return those column numbers to letters
 	end
 
 
