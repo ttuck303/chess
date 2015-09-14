@@ -22,6 +22,8 @@ class Pawn < Piece
 		elsif (y.abs == 2) && @moved 	# if first move, allowed to go 2, otherwise just 1
 			puts "Illegal Move: Can only move 2 spaces on piece's first move."
 			return false
+		else
+			return true
 		end
 	end
 
@@ -30,9 +32,9 @@ class Pawn < Piece
 
 	def correct_direction?(y) # if white, move up; if black, move down
 		if @team == :white
-			return y <= 0
-		elsif @team == :black
 			return y >= 0
+		elsif @team == :black
+			return y <= 0
 		else
 			"Error."
 			return nil

@@ -8,8 +8,6 @@ require_relative 'King'
 
 class Board
 	attr_accessor :board
-	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => '5', 'f' => 6, 'g' => 7, 'h' => 8}
-	NUM_2_LET = LET_2_NUM.invert
 
 	def initialize
 		@board = blank_board
@@ -99,21 +97,7 @@ class Board
 		return nil
 	end
 
-	def calculate_x_difference(space_1, space_2)
-		(letter_to_number(space_2) - letter_to_number(space1))
-	end
 
-	def calculate_y_difference(space_1, space_2)
-		(space_2 - space1)
-	end
-
-	def letter_to_number(letter)
-		LET_2_NUM[letter]
-	end
-
-	def number_to_letter(number)
-		NUM_2_LET[letter]
-	end
 
 	
 

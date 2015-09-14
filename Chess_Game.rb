@@ -4,42 +4,46 @@ require_relative 'Piece'
 class Chess_Game
 	attr_accessor :active_player
 
+	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => '5', 'f' => 6, 'g' => 7, 'h' => 8}
+	NUM_2_LET = LET_2_NUM.invert
+
 	def initialize
 		@active_player = :white
 		@game_board = Board.new
 	end
 
 	def get_player_move
-		piece = select_a_piece
+		temp = select_a_piece
+		piece = temp[0]
+		origin = temp[1]
 		confirm_piece_selection
 		move = enter_desired_move
-		unless legal_move?(piece, move)
-			until legal_move?(piece, move)
-				move = enter_desired_move
-			end
+		until legal_move?(piece, origin, move)
+			move = enter_desired_move
 		end
+		puts "Moving #{piece} from #{origin} to #{move}."
 		[piece, move] # return a piece and the legal move
 	end
 
 	def select_a_piece
-		puts "Select a piece to move (e.g. 'a1' thru 'h8')"
+		puts "Select a piece to move by indicating the space of the piece (e.g. 'a1' thru 'h8')"
 		choice = gets.strip.to_sym
 		piece = nil
 	
 		if !on_board?(choice) 					# check that the space entry is legit
 			puts "Selection #{choice} is not on game board. Please try again."
-			select_a_piece
+			return select_a_piece
 		elsif !space_occupied?(choice) 						# check that the space is occupied
 			puts "There is no piece in the space. Please try again."
-			select_a_piece
+			return select_a_piece
 		elsif !selection_is_on_active_team?(choice) 		# check that the piece belongs to the active player's team
 			puts "That's not your team!"
-			select_a_piece
+			return select_a_piece
 		else
 			piece = @game_board.board[choice]
 			puts "You have selected #{piece.type} in space #{choice.to_s}."
 		end
-		piece
+		return [piece, choice]
 	end
 
 	def confirm_piece_selection
@@ -53,17 +57,25 @@ class Chess_Game
 		choice = gets.strip.to_sym
 	end
 
-	def legal_move?(piece, move)
+	def legal_move?(piece, origin, move)
+		puts "Debug: "
+		puts "Piece = #{piece}"
+		puts "Origin = #{origin}"
+		puts "Move = #{move}"
+
+
 		if !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
 			return false
 		elsif space_occupied?(move) && selection_is_on_active_team?(move)   	# check that the desired space is not occupied by a teammate
 			puts "That space is occupied by your team. Please try again."
 			return false
-		#elsif 	
-			#do stuff	
+		elsif !legal_piece_specific_move?(piece, origin, move)
+			return false
+		else
+			return true
 		end
-	
+	 
 		# check that the move abides by the piece's move rules
 			# check acceptable "difference" in row and column
 			# check the piece is not "flying" over other pieces
@@ -74,6 +86,13 @@ class Chess_Game
 				# pawn can take an opponent in a diagonal spot
 				# check that the move would not move the King into check
 	end
+
+	def legal_piece_specific_move?(piece, origin, move)
+		x_diff = calculate_x_difference(origin, move)
+		y_diff = calculate_y_difference(origin, move)
+		piece.acceptable_move?(x_diff, y_diff)
+	end
+
 
 	def on_board?(selection)
 		@game_board.board.has_key?(selection)
@@ -144,8 +163,22 @@ class Chess_Game
 			# if pawn moves into last space, generate new piece for that team
 		end
 
+	end
 
+	def calculate_x_difference(space_1, space_2)
+		(letter_to_number(space_2[0]) - letter_to_number(space_1[0]))
+	end
 
+	def calculate_y_difference(space_1, space_2)
+		(space_2[1].to_i - space_1[1].to_i)
+	end
+
+	def letter_to_number(letter)
+		LET_2_NUM[letter]
+	end
+
+	def number_to_letter(number)
+		NUM_2_LET[letter]
 	end
 
 

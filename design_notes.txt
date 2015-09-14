@@ -112,4 +112,9 @@ How do you represent a kind of piece's acceptable move patterns?
 				# if reach the end, become any piece the user wants
 
 
+		Chess Game class should be doing the checks of situation involving board and piece(s)
+		Piece class can check for individual illegal moves
+		Board should not do any checking
+		
+
 
