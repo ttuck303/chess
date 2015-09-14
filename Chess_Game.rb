@@ -70,7 +70,9 @@ class Chess_Game
 		elsif space_occupied?(move) && selection_is_on_active_team?(move)   	# check that the desired space is not occupied by a teammate
 			puts "That space is occupied by your team. Please try again."
 			return false
-		elsif !legal_piece_specific_move?(piece, origin, move)  # check that the move abides by the piece's move rules (on an open board)
+		elsif !allowed_piece_movement?(piece, origin, move)  # check that the move abides by the piece's move rules (on an open board)
+			return false
+		elsif hopping_violation?(spaces_between(origin, move), piece) #hopping violation doesn't apply to knights.
 			return false
 		else
 			return true
@@ -87,7 +89,7 @@ class Chess_Game
 				# check that the move would not move the King into check
 	end
 
-	def legal_piece_specific_move?(piece, origin, move)
+	def allowed_piece_movement?(piece, origin, move)
 		x_diff = calculate_x_difference(origin, move)
 		y_diff = calculate_y_difference(origin, move)
 		piece.acceptable_move?(x_diff, y_diff)
@@ -106,54 +108,13 @@ class Chess_Game
 		@game_board.board[selection].team == @active_player
 	end
 
-
-	def acceptable_end_location?(origin, destination)
-		if move_out_of_bounds?
-			puts "Illegal move: cannot move is off the board."
-			return false
-		elsif move_into_check?
-			puts "Illegal move: you are moving into check."
-			return false
-		elsif own_piece_in_the_way?
-			puts "Illegal move: your own piece is in the way."
-			return false
-		elsif destination_same_as_origin?(origin, destination)
-			puts "You must move the piece to a new space."
-			return false
-		else
-			return true
-		end
-	end
-
 	def destination_same_as_origin?(origin, destination)
 		origin == destination
 	end
 
-	def move_out_of_bounds?
-		return false
-	end
-
-	def move_into_check?
-		return false
-	end
-
-	def own_piece_in_the_way?
-		return false
-	end
-
-
 	def game_loop
 		@game_board.display_board
 		get_player_move
-	end
-
-	def save_game
-	end
-
-	def load_game
-	end
-
-	def end_game_condition
 	end
 
 	def special_case_check(piece, start, move)
@@ -181,7 +142,7 @@ class Chess_Game
 		NUM_2_LET[letter]
 	end
 
-	def spaces_between(origin, move) #returns all the spaces in a direct line between the origin and the move
+	def spaces_between(origin, move) #returns all the spaces in a direct line between the origin and the move, not including origin and move themselves!
 		#case 1 straight and vertical -> can tell because same column (letter from each space is same)
 			# do: iterate over the numbers between the two end points
 		#case 2 straight and horizontal -> can tell because same row (number from each space is same)
@@ -192,6 +153,27 @@ class Chess_Game
 			# do: convert letters to numbers, iterate over group, return those column numbers to letters
 		#case 4 diagonal to the lower left ->  can tell because y_diff < 0 
 			# do: convert letters to numbers, iterate over group, return those column numbers to letters
+	end
+
+	def hopping_violation?(spaces, piece) #iterate over a list of spaces and check that they are each empty
+		if piece.type == :knight
+			return false
+		else
+			spaces.each do |space|
+				return true if !@game_board.board[space].nil?
+			end
+		end
+		return false
+	end
+
+
+	def save_game
+	end
+
+	def load_game
+	end
+
+	def end_game_condition
 	end
 
 
