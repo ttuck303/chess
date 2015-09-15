@@ -1,10 +1,11 @@
 require_relative 'Board'
 require_relative 'Piece'
+require_relative 'Pawn'
 
 class Chess_Game
 	attr_accessor :active_player
 
-	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => '5', 'f' => 6, 'g' => 7, 'h' => 8}
+	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8}
 	NUM_2_LET = LET_2_NUM.invert
 
 	def initialize
@@ -127,7 +128,7 @@ class Chess_Game
 	end
 
 	def calculate_x_difference(space_1, space_2)
-		(letter_to_number(space_2[0]) - letter_to_number(space_1[0]))
+		(letter_to_number(space_2.to_s[0]) - letter_to_number(space_1.to_s[0]))
 	end
 
 	def calculate_y_difference(space_1, space_2)
@@ -135,15 +136,18 @@ class Chess_Game
 	end
 
 	def letter_to_number(letter)
+		puts "Letter = #{letter}"
+		puts "Number = #{LET_2_NUM[letter]}"
 		LET_2_NUM[letter]
 	end
 
 	def number_to_letter(number)
-		NUM_2_LET[letter]
+		puts "Number: #{number}"
+		puts "Letter: #{NUM_2_LET[number]}"
+		NUM_2_LET[number]
 	end
 
 	def spaces_between(origin, move) 
-	#returns all the spaces in a direct line between the origin and the move, not including origin and move themselves!
 		o_column = origin.to_s[0] 
 		o_row = origin.to_s[1]
 		m_column = move.to_s[0]
@@ -151,39 +155,50 @@ class Chess_Game
 		x_diff = calculate_x_difference(origin, move)
 		y_diff = calculate_y_difference(origin, move)
 		output = []
-	
-		#case 0 adjacent spaces
-		#case 1 straight and vertical -> can tell because same column (letter from each space is same)
 		if o_column == m_column
-			# do: iterate over the numbers between the two end points
+			puts "Case 1"
 			range = Range.new(o_row.to_i, m_row.to_i)
-			range.each {|num| output << (o_column+num.to_s)}
-	
-		#case 2 straight and horizontal -> can tell because same row (number from each space is same)
+			range.each {|num| output << (o_column+num.to_s).to_sym}
 		elsif o_row == m_row
-			# do: convert the letters to numbers, iterate over the range, convert those numbers back to letters
+			puts "Case 2"
 			o_row_conversion = letter_to_number(o_column)
 			m_row_conversion = letter_to_number(m_column)
 			range = Range.new(o_row_conversion, m_row_conversion)
 			range.each do |num|
 				let = number_to_letter(num)
-				output << (let+o_row)
+				output << (let+o_row).to_sym
 			end
+		elsif x_diff.abs == y_diff.abs
+			puts "Case 3a"
+			if y_diff >0
+				range = Range.new(o_row.to_i, m_row.to_i)
+				puts "Range = #{range}"
+				range.each_with_index do |num, idx|
+					letter = number_to_letter(letter_to_number(o_column)+idx)
+					puts "Letter translation is #{letter}"
+					puts "Number is #{num}"
+					output << (letter+num.to_s).to_sym
+				end
+			elsif y_diff < 0
+				#mirror image
+				puts "Case 3b"
+				range = Range.new(m_row.to_i, o_row.to_i)
+				puts "Range #{range}"
+				range.each_with_index do |num, idx|
+					letter = number_to_letter(letter_to_number(o_column)+idx)
+					puts "Letter translation is #{letter}"
+					puts "Number is #{num}"
+					output << (letter+num.to_s).to_sym
+				end
 
-		# case 3: can tell diagonal because x_diff = y_diff
-		elsif calculate_x_difference(origin, move) == calculate_y_difference(origin, move)
-			# case 3a diagonal to the upper right -> can tell because y_diff > 0
-			if y_diff > 0		
-			# do: convert letters to numbers, iterate over group, return those column numbers to letters
-			else
-		#case 3b diagonal to the lower left ->  can tell because y_diff < 0 
-			# do: convert letters to numbers, iterate over group, return those column numbers to letters
-		else
+			end
+					
 		end
+		puts "Output = #{output}"
 		return output[1..-2] 
 	end
 
-	def hopping_violation?(spaces, piece) #iterate over a list of spaces and check that they are each empty
+	def hopping_violation?(spaces, piece)
 		if piece.type == :knight
 			return false
 		else
@@ -209,4 +224,30 @@ end
 
 
 g = Chess_Game.new
-g.game_loop
+p = Pawn.new(:white)
+#g.game_loop
+
+puts "Vertical Test:"
+spaces = g.spaces_between(:a2, :a8)
+puts spaces
+puts
+puts g.hopping_violation?(spaces, p)
+puts
+puts "Horizontal Test:"
+spaces2 = g.spaces_between(:a2, :h2)
+puts spaces2
+puts
+puts g.hopping_violation?(spaces2, p)
+puts 
+puts "Diagonal Test:"
+spaces3 = g.spaces_between(:a2, :g8)
+puts spaces3
+puts g.hopping_violation?(spaces3, p)
+puts "Diagonal Test2:"
+spaces4 = g.spaces_between(:h2, :b8)
+puts spaces4
+puts g.hopping_violation?(spaces4, p)
+
+
+
+
