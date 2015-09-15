@@ -142,17 +142,45 @@ class Chess_Game
 		NUM_2_LET[letter]
 	end
 
-	def spaces_between(origin, move) #returns all the spaces in a direct line between the origin and the move, not including origin and move themselves!
+	def spaces_between(origin, move) 
+	#returns all the spaces in a direct line between the origin and the move, not including origin and move themselves!
+		o_column = origin.to_s[0] 
+		o_row = origin.to_s[1]
+		m_column = move.to_s[0]
+		m_row = move.to_s[1]
+		x_diff = calculate_x_difference(origin, move)
+		y_diff = calculate_y_difference(origin, move)
+		output = []
+	
+		#case 0 adjacent spaces
 		#case 1 straight and vertical -> can tell because same column (letter from each space is same)
+		if o_column == m_column
 			# do: iterate over the numbers between the two end points
+			range = Range.new(o_row.to_i, m_row.to_i)
+			range.each {|num| output << (o_column+num.to_s)}
+	
 		#case 2 straight and horizontal -> can tell because same row (number from each space is same)
+		elsif o_row == m_row
 			# do: convert the letters to numbers, iterate over the range, convert those numbers back to letters
+			o_row_conversion = letter_to_number(o_column)
+			m_row_conversion = letter_to_number(m_column)
+			range = Range.new(o_row_conversion, m_row_conversion)
+			range.each do |num|
+				let = number_to_letter(num)
+				output << (let+o_row)
+			end
 
-		# can tell diagonal because x_diff = y_diff
-		#case 3 diagonal to the upper right -> can tell because y_diff > 0
+		# case 3: can tell diagonal because x_diff = y_diff
+		elsif calculate_x_difference(origin, move) == calculate_y_difference(origin, move)
+			# case 3a diagonal to the upper right -> can tell because y_diff > 0
+			if y_diff > 0		
 			# do: convert letters to numbers, iterate over group, return those column numbers to letters
-		#case 4 diagonal to the lower left ->  can tell because y_diff < 0 
+			else
+		#case 3b diagonal to the lower left ->  can tell because y_diff < 0 
 			# do: convert letters to numbers, iterate over group, return those column numbers to letters
+		else
+		end
+		return output[1..-2] 
 	end
 
 	def hopping_violation?(spaces, piece) #iterate over a list of spaces and check that they are each empty
