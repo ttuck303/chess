@@ -155,6 +155,9 @@ class Chess_Game
 		x_diff = calculate_x_difference(origin, move)
 		y_diff = calculate_y_difference(origin, move)
 		output = []
+		puts "o_column = #{o_column}, o_row = #{o_row}, m_column = #{m_column}, m_row = #{m_row}, x_diff = #{x_diff}, y_diff = #{y_diff}"
+
+
 		if o_column == m_column
 			puts "Case 1"
 			range = Range.new(o_row.to_i, m_row.to_i)
@@ -170,7 +173,7 @@ class Chess_Game
 			end
 		elsif x_diff.abs == y_diff.abs
 			puts "Case 3a"
-			if y_diff >0
+			if x_diff > 0
 				range = Range.new(o_row.to_i, m_row.to_i)
 				puts "Range = #{range}"
 				range.each_with_index do |num, idx|
@@ -179,13 +182,13 @@ class Chess_Game
 					puts "Number is #{num}"
 					output << (letter+num.to_s).to_sym
 				end
-			elsif y_diff < 0
+			elsif x_diff < 0
 				#mirror image
 				puts "Case 3b"
-				range = Range.new(m_row.to_i, o_row.to_i)
+				range = Range.new(o_row.to_i, m_row.to_i)
 				puts "Range #{range}"
 				range.each_with_index do |num, idx|
-					letter = number_to_letter(letter_to_number(o_column)+idx)
+					letter = number_to_letter(letter_to_number(o_column)-idx)
 					puts "Letter translation is #{letter}"
 					puts "Number is #{num}"
 					output << (letter+num.to_s).to_sym
@@ -227,26 +230,49 @@ g = Chess_Game.new
 p = Pawn.new(:white)
 #g.game_loop
 
+
+
+=begin 
+
+Hopping Violation Test Cases
+
 puts "Vertical Test:"
 spaces = g.spaces_between(:a2, :a8)
 puts spaces
 puts
 puts g.hopping_violation?(spaces, p)
 puts
+
 puts "Horizontal Test:"
 spaces2 = g.spaces_between(:a2, :h2)
 puts spaces2
 puts
 puts g.hopping_violation?(spaces2, p)
 puts 
+
 puts "Diagonal Test:"
 spaces3 = g.spaces_between(:a2, :g8)
 puts spaces3
 puts g.hopping_violation?(spaces3, p)
+
 puts "Diagonal Test2:"
 spaces4 = g.spaces_between(:h2, :b8)
 puts spaces4
 puts g.hopping_violation?(spaces4, p)
+
+puts "Diagontal Test 3"
+spaces5 = g.spaces_between(:a2, :d5)
+puts spaces5
+puts g.hopping_violation?(spaces5, p)
+
+puts "Vertical Test 2"
+spaces6 = g.spaces_between(:a2, :a5)
+puts spaces6
+puts g.hopping_violation?(spaces6, p)
+
+=end
+
+
 
 
 
