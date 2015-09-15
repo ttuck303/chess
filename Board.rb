@@ -28,6 +28,15 @@ class Board
 		@board[space] = obj
 	end
 
+	def space_occupied?(space)
+		!@board[space].nil?
+	end
+
+	def empty_space(space)
+		@board[space] = nil
+	end
+
+
 	def populate_new_board #TO DO: refactor to be more concise
 		for i in 'a'..'h'
 			populate_space((i+'2').to_sym, Pawn.new('white'))

@@ -3,6 +3,8 @@ class Piece
 
 	def initialize(team)
 		@team = team.to_sym
+		@moved = false
+		@alive = true
 	end
 
 	def assign_symbol(team, type)
@@ -43,6 +45,18 @@ class Piece
 	end
 
 	def move_pattern
+	end
+
+	def acceptable_move?(origin, move)
+		true
+	end
+
+	def move
+		@moved = true
+	end
+
+	def taken
+		@alive = false
 	end
 
 end

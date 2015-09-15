@@ -17,13 +17,13 @@ class Chess_Game
 		temp = select_a_piece
 		piece = temp[0]
 		origin = temp[1]
-		#confirm_piece_selection
 		move = enter_desired_move
 		until legal_move?(piece, origin, move)
 			move = enter_desired_move
+			return get_player_move if move.to_s.downcase == 'o'
 		end
 		puts "Moving #{piece} from #{origin} to #{move}."
-		[piece, move] # return a piece and the legal move
+		[origin, move, piece] # return a piece and the legal move
 	end
 
 	def select_a_piece
@@ -54,16 +54,15 @@ class Chess_Game
 	end
 
 	def enter_desired_move
-		puts "Where do you want to move?"
+		puts "Where do you want to move? (Enter o to select another piece to move)."
 		choice = gets.strip.to_sym
 	end
 
 	def legal_move?(piece, origin, move)
-		puts "Debug: "
-		puts "Piece = #{piece}"
-		puts "Origin = #{origin}"
-		puts "Move = #{move}"
-
+		#puts "Debug: "
+		#puts "Piece = #{piece}"
+		#puts "Origin = #{origin}"
+		#puts "Move = #{move}"
 
 		if !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
@@ -74,6 +73,7 @@ class Chess_Game
 		elsif !allowed_piece_movement?(piece, origin, move)  # check that the move abides by the piece's move rules (on an open board)
 			return false
 		elsif hopping_violation?(spaces_between(origin, move), piece) #hopping violation doesn't apply to knights.
+			puts "Your #{piece.type} cannot jump other pieces. Please try again."
 			return false
 		else
 			return true
@@ -97,6 +97,14 @@ class Chess_Game
 	end
 
 
+	def move_piece(origin, move, piece)
+		# assumes that the checking logic has approved this move aleady
+		@game_board.board[move].taken if @game_board.space_occupied?(move)
+		@game_board.populate_space(move, piece)
+		@game_board.empty_space(origin)
+	end
+
+
 	def on_board?(selection)
 		@game_board.board.has_key?(selection)
 	end
@@ -114,8 +122,12 @@ class Chess_Game
 	end
 
 	def game_loop
-		@game_board.display_board
-		get_player_move
+		until game_over?
+			@game_board.display_board
+			move_info = get_player_move
+			move_piece(move_info[0], move_info[1], move_info[2])
+			switch_team
+		end
 	end
 
 	def special_case_check(piece, start, move)
@@ -136,14 +148,10 @@ class Chess_Game
 	end
 
 	def letter_to_number(letter)
-		puts "Letter = #{letter}"
-		puts "Number = #{LET_2_NUM[letter]}"
 		LET_2_NUM[letter]
 	end
 
 	def number_to_letter(number)
-		puts "Number: #{number}"
-		puts "Letter: #{NUM_2_LET[number]}"
 		NUM_2_LET[number]
 	end
 
@@ -155,15 +163,14 @@ class Chess_Game
 		x_diff = calculate_x_difference(origin, move)
 		y_diff = calculate_y_difference(origin, move)
 		output = []
-		puts "o_column = #{o_column}, o_row = #{o_row}, m_column = #{m_column}, m_row = #{m_row}, x_diff = #{x_diff}, y_diff = #{y_diff}"
-
 
 		if o_column == m_column
 			puts "Case 1"
 			range = Range.new(o_row.to_i, m_row.to_i)
+			puts "Range = #{range}"
 			range.each {|num| output << (o_column+num.to_s).to_sym}
+			puts "output = #{output}"
 		elsif o_row == m_row
-			puts "Case 2"
 			o_row_conversion = letter_to_number(o_column)
 			m_row_conversion = letter_to_number(m_column)
 			range = Range.new(o_row_conversion, m_row_conversion)
@@ -172,32 +179,21 @@ class Chess_Game
 				output << (let+o_row).to_sym
 			end
 		elsif x_diff.abs == y_diff.abs
-			puts "Case 3a"
 			if x_diff > 0
 				range = Range.new(o_row.to_i, m_row.to_i)
-				puts "Range = #{range}"
 				range.each_with_index do |num, idx|
 					letter = number_to_letter(letter_to_number(o_column)+idx)
-					puts "Letter translation is #{letter}"
-					puts "Number is #{num}"
 					output << (letter+num.to_s).to_sym
 				end
 			elsif x_diff < 0
-				#mirror image
-				puts "Case 3b"
 				range = Range.new(o_row.to_i, m_row.to_i)
-				puts "Range #{range}"
 				range.each_with_index do |num, idx|
 					letter = number_to_letter(letter_to_number(o_column)-idx)
-					puts "Letter translation is #{letter}"
-					puts "Number is #{num}"
 					output << (letter+num.to_s).to_sym
 				end
-
 			end
-					
 		end
-		puts "Output = #{output}"
+		puts "Output = #{output[1..-2]}"
 		return output[1..-2] 
 	end
 
@@ -219,7 +215,16 @@ class Chess_Game
 	def load_game
 	end
 
-	def end_game_condition
+	def game_over?
+		false
+	end
+
+	def switch_team
+		if @active_player == :white
+			@active_player = :black
+		else
+			@active_player = :white
+		end
 	end
 
 
@@ -232,12 +237,11 @@ p = Pawn.new(:white)
 
 
 
-=begin 
 
-Hopping Violation Test Cases
+
 
 puts "Vertical Test:"
-spaces = g.spaces_between(:a2, :a8)
+spaces = g.spaces_between(:a7, :a5)
 puts spaces
 puts
 puts g.hopping_violation?(spaces, p)
@@ -270,7 +274,6 @@ spaces6 = g.spaces_between(:a2, :a5)
 puts spaces6
 puts g.hopping_violation?(spaces6, p)
 
-=end
 
 
 

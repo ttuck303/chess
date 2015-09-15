@@ -7,5 +7,7 @@ class Knight < Piece
 		@type = :knight 
 		@symbol = assign_symbol(@team, @type)
 	end
+
+	
 	
 end
