@@ -144,5 +144,17 @@ Spaces between method
 			for down-right, special case where we must reverse a range at some point
 				so put smaller letter first
 				create number range in ascending order, and then reverse it
-				
+
+------
+
+To Do List (not in order)
+1. update all piece classes with methods to check that moves are acceptable
+2. write an algorithm to see if a team is in check / checkm8
+3. write a method to convert a pawn to any desired piece if it reaches the opposite end of the board
+4. implement a way to play out whole games by entering game history
+5. refactor / clean up
+6. build some AI!
+7. connect with online chess API and start pwning n00bz
+8. display sidelined pieces
+9. make sure that the @moved? flag on pieces is updated properly
 
