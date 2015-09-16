@@ -157,51 +157,21 @@ class Chess_Game
 
 	def spaces_between(origin, move) 
 		o_column = origin.to_s[0] 
-		o_row = origin.to_s[1]
+		o_row = origin.to_s[1].to_i
 		m_column = move.to_s[0]
-		m_row = move.to_s[1]
-		x_diff = calculate_x_difference(origin, move)
-		y_diff = calculate_y_difference(origin, move)
+		m_row = move.to_s[1].to_i
 		output = []
-		range = nil
 
-		puts "#{o_column} #{o_row} #{m_column} #{m_row} #{x_diff} #{y_diff}"
-
-		if x_diff == 0
-			if y_diff < 0
-				range = Range.new(m_row.to_i, o_row.to_i).to_a.reverse!
-			else
-				range = (Range.new(o_row.to_i, m_row.to_i)).to_a
-			end
-			range.each {|num| output << (o_column+num.to_s).to_sym}
-		elsif o_row == m_row
-			if x_diff > 0
-				range = Range.new(o_column, m_column).to_a
-			else
-				range = Range.new(m_column, o_column).to_a.reverse!
-			end
-			range.each {|let| output << (let+o_row.to_s).to_sym}
-		elsif x_diff.abs == y_diff.abs
-			if x_diff > 0
-				range = Range.new(o_row.to_i, m_row.to_i)
-				range.each_with_index do |num, idx|
-					letter = number_to_letter(letter_to_number(o_column)+idx)
-					output << (letter+num.to_s).to_sym
-				end
-			elsif x_diff < 0
-				range = Range.new(o_row.to_i, m_row.to_i)
-				range.each_with_index do |num, idx|
-					letter = number_to_letter(letter_to_number(o_column)-idx)
-					output << (letter+num.to_s).to_sym
-				end
-			end
+		if o_column < m_column
+			output = create_spaces_list(o_column, m_column, o_row, m_row)
+		else
+			output = create_spaces_list(m_column, o_column, m_row, o_row)
 		end
+
 		return output[1..-2] 
 	end
 
 	def create_spaces_list(smaller_letter, larger_letter, number_1, number_2)
-		puts "Inputs: smaller_letter = #{smaller_letter}, larger_letter = #{larger_letter}"
-		puts "number_1 = #{number_1}, number_2 = #{number_2}"
 		letter_range, number_range = nil, nil
 		output = []
 
@@ -224,13 +194,7 @@ class Chess_Game
 		end
 
 		output
-
 	end
-
-
-
-
-
 
 
 	def hopping_violation?(spaces, piece)
@@ -275,9 +239,9 @@ g = Chess_Game.new
 
 
 
-=begin
-	
-Hopping Method Tests 
+
+=begin 	
+#Hopping Method Tests 
 
 puts "Vertical Test:"
 spaces = g.spaces_between(:a7, :a5)
@@ -319,7 +283,7 @@ puts g.hopping_violation?(spaces7, p)
 
 =end
 
-
+=begin
 #testing get spaces method
 
 test1 = g.create_spaces_list('a', 'a', 3, 5)
@@ -348,7 +312,7 @@ puts
 
 
 
-
+=end
 
 
 
