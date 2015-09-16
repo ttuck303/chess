@@ -18,7 +18,7 @@ class Chess_Game
 		piece = temp[0]
 		origin = temp[1]
 		move = enter_desired_move
-		until legal_move?(piece, origin, move)
+		until legal_move?(origin, move, piece)
 			move = enter_desired_move
 			return get_player_move if move.to_s.downcase == 'o'
 		end
@@ -58,7 +58,7 @@ class Chess_Game
 		choice = gets.strip.to_sym
 	end
 
-	def legal_move?(piece, origin, move)
+	def legal_move?(origin, move, piece)
 		#puts "Debug: "
 		#puts "Piece = #{piece}"
 		#puts "Origin = #{origin}"
@@ -70,11 +70,14 @@ class Chess_Game
 		elsif space_occupied?(move) && selection_is_on_active_team?(move)   	# check that the desired space is not occupied by a teammate
 			puts "That space is occupied by your team. Please try again."
 			return false
-		elsif !allowed_piece_movement?(piece, origin, move)  # check that the move abides by the piece's move rules (on an open board)
+		elsif !allowed_piece_movement?(origin, move, piece)  # check that the move abides by the piece's move rules (on an open board)
 			return false
 		elsif hopping_violation?(spaces_between(origin, move), piece) #hopping violation doesn't apply to knights.
 			puts "Your #{piece.type} cannot jump other pieces. Please try again."
 			return false
+		elsif violates_special_cases?(origin, move, piece)
+			return false
+
 		else
 			return true
 		end
@@ -90,7 +93,7 @@ class Chess_Game
 				# check that the move would not move the King into check
 	end
 
-	def allowed_piece_movement?(piece, origin, move)
+	def allowed_piece_movement?(origin, move, piece)
 		x_diff = calculate_x_difference(origin, move)
 		y_diff = calculate_y_difference(origin, move)
 		piece.acceptable_move?(x_diff, y_diff)
@@ -117,6 +120,10 @@ class Chess_Game
 		@game_board.board[selection].team == @active_player
 	end
 
+	def selection_is_enemy?(selection)
+		!selection_is_on_active_team
+	end
+
 	def destination_same_as_origin?(origin, destination)
 		origin == destination
 	end
@@ -130,16 +137,35 @@ class Chess_Game
 		end
 	end
 
-	def special_case_check(piece, start, move)
-		case piece
+	def space_occupied?(space)
+		@game_board.space_occupied?(space)
+	end
+
+	def violates_special_cases?(origin, move, piece)
+		case piece.type
 		when :pawn
+			x_diff = calculate_x_difference(origin, move)
+			y_diff = calculate_y_difference(origin, move)
+
+			# if move differential is 0,1, check that the space in front of the piece is not occupied
+			if x_diff == 0 && y_diff.abs == 1 && space_occupied?(move)
+				puts "Illegal Move: pawns cannot take pieces straight-on."
+				return true
+
 			# if move differential is 1,1, check that there is an enemy in that spot
+			elsif x_diff.abs == 1 && y_diff.abs == 1 && (!space_occupied?(move) || selection_is_on_active_team?(move))
+				puts "Illegal Move: pawn can only move diagonally when taking an opponent."
+				return true
+			end
 			# if pawn moves into last space, generate new piece for that team
 		end
 
 	end
 
 	def calculate_x_difference(space_1, space_2)
+		puts "Debug"
+		puts "space_1 #{space_1}"
+		puts "space_2 #{space_2}"
 		(letter_to_number(space_2.to_s[0]) - letter_to_number(space_1.to_s[0]))
 	end
 
@@ -233,7 +259,7 @@ end
 
 g = Chess_Game.new
 #p = Pawn.new(:white)
-#g.game_loop
+g.game_loop
 
 
 
