@@ -70,6 +70,27 @@ puts test5
 puts
 
 
+=end
+
+
+
+
+=begin
+
+Testing left column method
+
+test_board = Board.new
+
+puts test_board.left_column('a')
+puts test_board.left_column('h')
+puts test_board.left_column(:a5)
+puts test_board.left_column(:h8)
+puts test_board.left_column(:c5)
+puts test_board.left_column(:d8)
 
 
 =end
+
+
+	
+end

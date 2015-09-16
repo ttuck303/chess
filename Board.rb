@@ -8,6 +8,10 @@ require_relative 'King'
 
 class Board
 	attr_accessor :board
+	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8}
+	NUM_2_LET = LET_2_NUM.invert
+	CORNERS = corners = [:a1, :a8, :h1, :h8]
+	EDGES = [:a7, :a6, :a5, :a4, :a3, :a2, :b8, :c8, :d8, :e8, :f8, :g8, :h2, :h3, :h4, :h5, :h6, :h7, :b1, :c1, :d1, :e1, :f1, :g1]
 
 	def initialize
 		@board = blank_board
@@ -75,6 +79,8 @@ class Board
 	end
 
 
+
+
 	def display_board
 		row1, row2, row3, row4, row5, row6, row7, row8 = '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ' ,'8 '
 		@board.each do |key, value|
@@ -106,9 +112,59 @@ class Board
 		return nil
 	end
 
+	def surrounding_spaces(space)
+		output = []
+		if CORNERS.include?(space)
+			#case 1: corner
+		elsif EDGES.include?(space)
+			#case 2: edges
+		else
+			#case 3: in land
+		end
+	end
+
+	def left_column(column)
+		column = column.to_s[0]
+		return "Out of bounds" if column == 'a'
+		return NUM_2_LET[(LET_2_NUM[column]-1)]
+	end
 
 
-	
+	def relative_space(origin, direction)
+		# directions include n, ne, e, se, s, sw, w, nw
+		origin = origin.to_s
+		column = origin[0]
+		row = origin[1].to_i
 
+		case direction
+		when 'n'
+			row == 8 ? (return "Out of bounds") : (return (column+(row+1).to_s).to_sym)
+		when 'nw'
+			if row == 8 || column == 'a'
+				return "Out of bounds"
+			else
+				return (left_column(column) + (row-1).to_s).to_sym
+			end
+		when 'ne'
+			if row == 8 || column == 'h'
+				return "Out of bounds"
+			else
+				return (column.succ + (row+1).to_s).to_sym
+			end
+		end
+	end
 
 end
+
+
+
+test_board = Board.new
+
+puts test_board.left_column('a')
+puts test_board.left_column('h')
+puts test_board.left_column(:a5)
+puts test_board.left_column(:h8)
+puts test_board.left_column(:c5)
+puts test_board.left_column(:d8)
+
+

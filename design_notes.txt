@@ -186,7 +186,32 @@ steps
 5. check the list in 4 for enemies of a particular type
 6. check knight territory
 
+When to call the in_check? method
+- for active team, during the legal_move? loop
+- for opponent team, just after the move has been accepted
 
+
+How to check for checkm8? This will surely be related to the in_check? method
+
+Two situations:
+1. when the king is not in check but cannot move anywhere without being checkm8ed (think there is a name for this)
+2. when the king is placed under check by an opponent and nothing can be done to block this
+	1. the king cannot move to get out of harms way
+	2. the active team cannot move a piece to block the threat
+
+	This suggests it would be helpful to keep track of where the threat is coming from in the in_check? method
+
+Arguments for in_check?
+- team we are checking on
+- position of the king in question -> may need a helper method locate_king(team) 
+Output for in_check?
+- true or false
+- if true, where the threat is coming from (opponent piece and position)
+
+Maybe, the in check could return a list of possible moves for the king that would prevent checkm8, and if the list is nil, then checkm8
+Also need to create a list for the pieces that could block the threatening piece
+	- take the piece
+	- block the piece
 
 
 

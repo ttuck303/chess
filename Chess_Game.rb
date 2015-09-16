@@ -248,12 +248,20 @@ class Chess_Game
 		end
 	end
 
+	
+		# corner
+		# edge
+		# 'inland'
+
 
 end
 
 
 g = Chess_Game.new
-g.game_loop
+#g.game_loop
+
+
+
 
 
 
