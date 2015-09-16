@@ -129,6 +129,16 @@ class Board
 		return NUM_2_LET[(LET_2_NUM[column]-1)]
 	end
 
+	def locate_king(team)
+		@board.each_pair do |space, piece|
+			if !piece.nil?
+				if piece.type == :king && piece.team == team
+					return space
+				end
+			end
+		end
+		return "Error: cannot find king"
+	end
 
 	def relative_space(origin, direction)
 		# directions include n, ne, e, se, s, sw, w, nw
@@ -166,19 +176,14 @@ class Board
 		when 's'
 			return "Out of bounds" if row == 1
 			return (column + (row-1).to_s).to_sym
+		else
+			puts "Error: Unknown direction #{direction}."
 		end
 	end
 
 end
 
-test_board = Board.new
 
-puts test_board.relative_space(:a1, 'n')
-puts test_board.relative_space(:c5, 'n')
-puts test_board.relative_space(:a6, 's')
-puts test_board.relative_space(:h8, 'ne')
-puts test_board.relative_space(:h8, 'sw')
-puts test_board.relative_space(:b8, 'w')
 
 
 

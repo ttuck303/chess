@@ -248,10 +248,9 @@ class Chess_Game
 		end
 	end
 
+	def in_check?(team)
+	end
 	
-		# corner
-		# edge
-		# 'inland'
 
 
 end

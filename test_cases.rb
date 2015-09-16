@@ -93,4 +93,17 @@ puts test_board.left_column(:d8)
 
 
 	
-end
+=begin
+	
+Testing relative spaces method
+
+test_board = Board.new
+
+puts test_board.relative_space(:a1, 'n')
+puts test_board.relative_space(:c5, 'n')
+puts test_board.relative_space(:a6, 's')
+puts test_board.relative_space(:h8, 'ne')
+puts test_board.relative_space(:h8, 'sw')
+puts test_board.relative_space(:b8, 'w')
+
+=end
