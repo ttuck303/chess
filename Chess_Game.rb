@@ -148,7 +148,7 @@ class Chess_Game
 			y_diff = calculate_y_difference(origin, move)
 
 			# if move differential is 0,1, check that the space in front of the piece is not occupied
-			if x_diff == 0 && y_diff.abs == 1 && space_occupied?(move)
+			if (x_diff == 0 && (y_diff.abs == 1 || y_diff.abs == 2) && space_occupied?(move))
 				puts "Illegal Move: pawns cannot take pieces straight-on."
 				return true
 
