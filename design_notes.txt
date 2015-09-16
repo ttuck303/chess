@@ -148,7 +148,7 @@ Spaces between method
 ------
 
 To Do List (not in order)
-1. update all piece classes with methods to check that moves are acceptable
+1. update all piece classes with methods to check that moves are acceptable (complete, unchecked)
 2. write an algorithm to see if a team is in check / checkm8
 3. write a method to convert a pawn to any desired piece if it reaches the opposite end of the board
 4. implement a way to play out whole games by entering game history
@@ -157,4 +157,36 @@ To Do List (not in order)
 7. connect with online chess API and start pwning n00bz
 8. display sidelined pieces
 9. make sure that the @moved? flag on pieces is updated properly
+
+-----
+
+Checking if a king is in check brainstorm
+
+approach:
+- check each space surrounding the king
+	- if enemy piece in immediate proximity of a certain type, you could be in check
+		- pawn diagonally
+		- rook in a 'perpendicular' space
+		- queen in any space
+		- bishop diagonally
+		- king in any space
+	- if there are any gaps, extend out in a straight line until you see a piece
+		- if its an enemy of a certain type, you know you're in check
+			- rook in a perpendicular space
+			- bishop in a diagonal space
+			- queen in either type
+- check the spaces around a king where an enemy knight could be hiding
+	- if an enemy knight is in one of those spaces, you're in check
+
+steps
+1. generate a list of all immediate surrounding spaces
+2. check these spaces for enemies
+3. check these spaces for gaps
+4. create list of spaces in a straight line from gaps up to next piece
+5. check the list in 4 for enemies of a particular type
+6. check knight territory
+
+
+
+
 
