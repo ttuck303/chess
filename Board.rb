@@ -12,6 +12,7 @@ class Board
 	NUM_2_LET = LET_2_NUM.invert
 	CORNERS = corners = [:a1, :a8, :h1, :h8]
 	EDGES = [:a7, :a6, :a5, :a4, :a3, :a2, :b8, :c8, :d8, :e8, :f8, :g8, :h2, :h3, :h4, :h5, :h6, :h7, :b1, :c1, :d1, :e1, :f1, :g1]
+	DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
 
 	def initialize
 		@board = blank_board
@@ -153,7 +154,7 @@ class Board
 			if row == 8 || column == 'a'
 				return "Out of bounds"
 			else
-				return (left_column(column) + (row-1).to_s).to_sym
+				return (left_column(column) + (row+1).to_s).to_sym
 			end
 		when 'ne'
 			if row == 8 || column == 'h'
@@ -181,9 +182,34 @@ class Board
 		end
 	end
 
+
+	def get_surrounding_spaces(space)
+		output = []
+		DIRECTIONS.each do |dir|
+			result = relative_space(space, dir)
+			output << result if result != "Out of bounds"
+		end
+		output.sort!
+	end
+
+
 end
 
 
+b = Board.new
+
+test1 = b.get_surrounding_spaces(:a1)
+test2 = b.get_surrounding_spaces(:f5)
+test3 = b.get_surrounding_spaces(:h1)
+test4 = b.get_surrounding_spaces(:g8)
+
+puts test1
+puts
+puts test2
+puts
+puts test3
+puts
+puts test4
 
 
 

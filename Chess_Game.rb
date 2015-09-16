@@ -249,8 +249,10 @@ class Chess_Game
 	end
 
 	def in_check?(team)
+		king_location = @board.king_location(team)
+		surrounding_spaces = @board.get_surrounding_spaces(king_location)
 	end
-	
+
 
 
 end
