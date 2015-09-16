@@ -117,4 +117,32 @@ How do you represent a kind of piece's acceptable move patterns?
 		Board should not do any checking
 		
 
+----
+
+Spaces between method
+	vertical 							x_diff = 0
+		going up a3 a5					y_diff > 0
+		going down a5 a3				y_diff < 0
+	horizontal							y_diff = 0
+		going left h2 a2				x_diff < 0
+		going right a2 h2				x_diff > 0
+	diagonal 							x_diff.abs = 1 && y_diff.abs = 1
+		going up-right					x_diff and y_diff same sign (either + or -)
+			moving right a2 d5			both are positive
+			moving left d5 a2			both are negative
+		going down-right				x_diff and y_diff different signs
+			moving right a5 e1			x_diff > 0, y_diff < 0
+			moving left e1 a5			x_diff < 0, y_diff > 0
+
+	difficulty is that Range is one way, ascending only
+	directionality doesn't matter for my methods
+	there is really no difference between direction of movement, ie a->b is same as b->a, as long as you enter the arguments properly
+		for vertical, enter the one with the smaller row first
+		for horizontal, enter the one with the smaller letter first
+		for diagonal, 
+			for up-right, enter the smaller first (both will be smaller)
+			for down-right, special case where we must reverse a range at some point
+				so put smaller letter first
+				create number range in ascending order, and then reverse it
+				
 

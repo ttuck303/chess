@@ -163,21 +163,24 @@ class Chess_Game
 		x_diff = calculate_x_difference(origin, move)
 		y_diff = calculate_y_difference(origin, move)
 		output = []
+		range = nil
 
-		if o_column == m_column
-			puts "Case 1"
-			range = Range.new(o_row.to_i, m_row.to_i)
-			puts "Range = #{range}"
-			range.each {|num| output << (o_column+num.to_s).to_sym}
-			puts "output = #{output}"
-		elsif o_row == m_row
-			o_row_conversion = letter_to_number(o_column)
-			m_row_conversion = letter_to_number(m_column)
-			range = Range.new(o_row_conversion, m_row_conversion)
-			range.each do |num|
-				let = number_to_letter(num)
-				output << (let+o_row).to_sym
+		puts "#{o_column} #{o_row} #{m_column} #{m_row} #{x_diff} #{y_diff}"
+
+		if x_diff == 0
+			if y_diff < 0
+				range = Range.new(m_row.to_i, o_row.to_i).to_a.reverse!
+			else
+				range = (Range.new(o_row.to_i, m_row.to_i)).to_a
 			end
+			range.each {|num| output << (o_column+num.to_s).to_sym}
+		elsif o_row == m_row
+			if x_diff > 0
+				range = Range.new(o_column, m_column).to_a
+			else
+				range = Range.new(m_column, o_column).to_a.reverse!
+			end
+			range.each {|let| output << (let+o_row.to_s).to_sym}
 		elsif x_diff.abs == y_diff.abs
 			if x_diff > 0
 				range = Range.new(o_row.to_i, m_row.to_i)
@@ -193,9 +196,42 @@ class Chess_Game
 				end
 			end
 		end
-		puts "Output = #{output[1..-2]}"
 		return output[1..-2] 
 	end
+
+	def create_spaces_list(smaller_letter, larger_letter, number_1, number_2)
+		puts "Inputs: smaller_letter = #{smaller_letter}, larger_letter = #{larger_letter}"
+		puts "number_1 = #{number_1}, number_2 = #{number_2}"
+		letter_range, number_range = nil, nil
+		output = []
+
+		if smaller_letter == larger_letter
+			letter_range = Array.new((number_2 - number_1).abs+1, smaller_letter)
+		else
+			letter_range = Range.new(smaller_letter, larger_letter).to_a
+		end
+
+		if number_1 < number_2
+			number_range = Range.new(number_1, number_2).to_a
+		elsif number_1 == number_2
+			number_range = Array.new(letter_range.size, number_1)
+		else #number_1 > number_2
+			number_range = Range.new(number_2, number_1).to_a.reverse!
+		end
+
+		letter_range.each_with_index do |letter, index|
+			output << (letter+number_range[index].to_s).to_sym
+		end
+
+		output
+
+	end
+
+
+
+
+
+
 
 	def hopping_violation?(spaces, piece)
 		if piece.type == :knight
@@ -232,13 +268,16 @@ end
 
 
 g = Chess_Game.new
-p = Pawn.new(:white)
+#p = Pawn.new(:white)
 #g.game_loop
 
 
 
 
 
+=begin
+	
+Hopping Method Tests 
 
 puts "Vertical Test:"
 spaces = g.spaces_between(:a7, :a5)
@@ -273,6 +312,40 @@ puts "Vertical Test 2"
 spaces6 = g.spaces_between(:a2, :a5)
 puts spaces6
 puts g.hopping_violation?(spaces6, p)
+
+puts "Horizontal Test 2"
+spaces7 = g.spaces_between(:h2, :a2)
+puts g.hopping_violation?(spaces7, p)
+
+=end
+
+
+#testing get spaces method
+
+test1 = g.create_spaces_list('a', 'a', 3, 5)
+test2 = g.create_spaces_list('a', 'a', 5, 3)
+test3 = g.create_spaces_list('a', 'h', 2, 2)
+test4 = g.create_spaces_list('a', 'd', 2, 5)
+test5 = g.create_spaces_list('a', 'e', 5, 1)
+
+
+puts "Test 1:"
+puts test1
+puts
+puts "Test 2:"
+puts test2
+puts
+puts "Test 3:"
+puts test3
+puts
+puts "Test 4:"
+puts test4
+puts
+puts "Test 5:"
+puts test5
+puts
+
+
 
 
 
