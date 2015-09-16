@@ -32,7 +32,7 @@ class Piece
 			when :knight
 				return "\u265e"
 			when :bishop
-				return "\u265c"
+				return "\u265d"
 			when :queen
 				return "\u265b"
 			when :king
