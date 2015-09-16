@@ -151,20 +151,36 @@ class Board
 			else
 				return (column.succ + (row+1).to_s).to_sym
 			end
+		when 'e'
+			return "Out of bounds" if column == 'h'
+			return (column.succ+row.to_s).to_sym
+		when 'w'
+			return "Out of bounds" if column == 'a'
+			return (left_column(column)+row.to_s).to_sym
+		when 'se'
+			return "Out of bounds" if column == 'h' || row == 1
+			return (column.succ + (row+1).to_s).to_sym
+		when 'sw'
+			return "Out of bounds" if column == 'a' || row == 1
+			return (left_column(column)+(row-1).to_s).to_sym
+		when 's'
+			return "Out of bounds" if row == 1
+			return (column + (row-1).to_s).to_sym
 		end
 	end
 
 end
 
-
-
 test_board = Board.new
 
-puts test_board.left_column('a')
-puts test_board.left_column('h')
-puts test_board.left_column(:a5)
-puts test_board.left_column(:h8)
-puts test_board.left_column(:c5)
-puts test_board.left_column(:d8)
+puts test_board.relative_space(:a1, 'n')
+puts test_board.relative_space(:c5, 'n')
+puts test_board.relative_space(:a6, 's')
+puts test_board.relative_space(:h8, 'ne')
+puts test_board.relative_space(:h8, 'sw')
+puts test_board.relative_space(:b8, 'w')
+
+
+
 
 
