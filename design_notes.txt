@@ -179,8 +179,8 @@ approach:
 	- if an enemy knight is in one of those spaces, you're in check
 
 steps
-1. generate a list of all immediate surrounding spaces
-2. check these spaces for enemies
+1. generate a list of all immediate surrounding spaces (DONE)
+2. for each surrounding space, check to see if there is an enemy, and if so, check if the enemy is a threat. if no threats are detected, return an array of all the blank spaces
 3. check these spaces for gaps
 4. create list of spaces in a straight line from gaps up to next piece
 5. check the list in 4 for enemies of a particular type
@@ -215,6 +215,17 @@ Also need to create a list for the pieces that could block the threatening piece
 
 
 Note: would be more economical to cycle through the surrounding spaces of the king all in one go
+
+
+
+Be more specific with HOW you are going to check for check
+
+
+-------
+
+update 9/17
+
+need to now create a bunch of test boards to debug the inevitable mess
 
 
 

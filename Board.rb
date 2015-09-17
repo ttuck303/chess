@@ -80,8 +80,9 @@ class Board
 		input.nil? ? (return " _ ") : (return (" "+input.symbol+" "))
 	end
 
-
-
+	def get_piece_in_space(space)
+		return @board[space]
+	end
 
 	def display_board
 		row1, row2, row3, row4, row5, row6, row7, row8 = '1 ', '2 ', '3 ', '4 ', '5 ', '6 ', '7 ' ,'8 '
@@ -133,8 +134,9 @@ class Board
 
 	def locate_king(team)
 		@board.each_pair do |space, piece|
+			puts "Space = #{space}, piece = #{piece}"
 			if !piece.nil?
-				if piece.type == :king && piece.team == team
+				if (piece.type == :king) && (piece.team == team)
 					return space
 				end
 			end
@@ -196,7 +198,7 @@ class Board
 	def is_border_space?(space)
 		BORDERS.include?(space)
 	end
-	
+
 
 
 

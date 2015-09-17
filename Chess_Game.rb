@@ -42,7 +42,7 @@ class Chess_Game
 			puts "That's not your team!"
 			return select_a_piece
 		else
-			piece = @game_board.board[choice]
+			piece = @game_board[choice]
 			puts "You have selected #{piece.type} in space #{choice.to_s}."
 		end
 		return [piece, choice]
@@ -103,26 +103,26 @@ class Chess_Game
 
 	def move_piece(origin, move, piece)
 		# assumes that the checking logic has approved this move aleady
-		@game_board.board[move].taken if @game_board.space_occupied?(move)
+		@game_board[move].taken if @game_board.space_occupied?(move)
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
 	end
 
 	def get_piece_in_space(space)
-		@game_board.board[space]
+		@game_board.get_piece_in_space(space)
 	end
 
 
 	def on_board?(selection)
-		@game_board.board.has_key?(selection)
+		@game_board.has_key?(selection)
 	end
 
 	def space_occupied?(selection)
-		!@game_board.board[selection].nil?
+		!@game_board[selection].nil?
 	end
 
 	def selection_is_on_active_team?(selection)
-		@game_board.board[selection].team == @active_player
+		@game_board[selection].team == @active_player
 	end
 
 	def selection_is_enemy?(selection)
@@ -229,7 +229,7 @@ class Chess_Game
 			return false
 		else
 			spaces.each do |space|
-				return true if !@game_board.board[space].nil?
+				return true if !@game_board[space].nil?
 			end
 		end
 		return false
@@ -255,14 +255,22 @@ class Chess_Game
 
 
 	def surrounding_spaces_and_pieces(space, kings_team) # return array with space, direction, and piece
+		puts "Entering surround spaces sub method"
 		enemy_team = other_team(kings_team)
 		enemies = []
 		vacancies = []
 
 		DIRECTIONS.each do |dir|
-			resulting_space = @game_board.board.relative_space(space, dir)
-			piece = get_piece_in_space(resulting_space) || "Empty"
-			piece_team = piece.team || "None"
+			puts "Getting resulting space"
+			resulting_space = @game_board.relative_space(space, dir)
+			puts "resulting_space found = #{resulting_space}"
+			if resulting_space != "Out of bounds"
+				piece = get_piece_in_space(resulting_space) 
+				piece_team = piece.team
+			else
+				piece = "None"
+				piece_team = "None"
+			end
 
 			if piece == "Empty"
 				vacancies << [resulting_space, dir.to_sym]
@@ -274,14 +282,21 @@ class Chess_Game
 			
 	end
 
+	def locate_king(kings_team)
+		return @game_board.locate_king(kings_team)
+	end
+
 	def in_check?(kings_team)
-		king_location = @board.king_location(kings_team)
-		surrounding_space_information = surrounding_spaces_and_pieces(king_location)
+		puts "Getting kings location..."
+		kings_location = locate_king(kings_team)
+		puts "Kings location found: #{kings_location}"
+		puts "Getting surrounding space information...."
+		surrounding_space_information = surrounding_spaces_and_pieces(kings_location, kings_team)
 		enemies = surrounding_space_information[:enemies]
 		vacancies = surrounding_space_information[:vacancies]
 		return true if proximity_threat_check?(enemies)	
-		return true if lurking_knight?(king_location, kings_team)
-		return true if threat_from_gaps?(king_location, vacancies, kings_team)
+		return true if lurking_knight?(kings_location, kings_team)
+		return true if threat_from_gaps?(kings_location, vacancies, kings_team)
 		return false
 
 	end
@@ -381,7 +396,7 @@ class Chess_Game
 	end
 
 	def rel_space(space, direction)
-		@game_board.board.relative_space(space, direction)
+		@game_board.relative_space(space, direction)
 	end
 
 	def get_knight_territory(center_space)
@@ -409,7 +424,7 @@ class Chess_Game
 		knight_territory.each do |space|
 			if space_occupied?(space)
 				if selection_is_enemy?(space)
-					return true if @game_board.board[space].type == :knight
+					return true if @game_board[space].type == :knight
 				end
 			end
 		end
@@ -429,6 +444,9 @@ end
 
 g = Chess_Game.new
 #g.game_loop
+
+g.in_check?(:white)
+
 
 
 
