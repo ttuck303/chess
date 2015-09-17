@@ -280,37 +280,57 @@ class Chess_Game
 		enemies = surrounding_space_information[:enemies]
 		vacancies = surrounding_space_information[:vacancies]
 		return true if proximity_threat_check?(enemies)	
-		
+		return true if lurking_knight?(king_location, kings_team)
+		return true if threat_from_gaps?(king_location, vacancies, kings_team)
+		return false
 
 	end
 
-	# conflicted here between compartmentalizing functions and repeatedly looping over the same list
-	# the master loop is fairly small, but it will be called 2x per turn
-	# it seems like you could do all the things at once maybe
+	def calc_adjacent_direction(origin, move) #between adjacent squares only!
+		x_diff = calculate_x_difference(origin, move)
+		y_diff = calculate_y_difference(origin, move)
+		dir = ''
+		if y_diff == 1
+			dir += 'n'
+		elsif y_diff == -1
+			dir += 's'
+		end
 
-	# what about stashing the arrays in the master method
-	# and calling sub methods for each function
-	# as long as you're not regenerating the loop over and over, you're just making the code more organized,
-	# not actually 
+		if x_diff == 1
+			dir += 'e'
+		elsif x_diff == -1
+			dir += 'w'
+		end
 
-	# lets create 2 arrays on the go that you will need, and then just stash them at first array and second array when returning
+		return dir 
+	end
 
-	# if you run surrounding spaces in the Chess Game class, you can just get the people in it a the same time?
+	def threat_from_gaps?(king_location, gaps, king_team)
+		enemy_team = other_team(kings_team)
+		gaps.each do |gap|
+			direction = calc_adjacent_direction(king_location, gap)
+			space = gap
+			until space_occupied?(space) || is_border?(space)
+				if space_occupied?(space)
+					piece = get_piece_in_space(space)
+					if piece.team == enemy_team
+						return true if ranged_enemy_threat?(piece, direction)
+					end
+				end
+			end
+		end
+		return false
+	end
 
-
-	# generate a list of spots where an enemy knight could be around the king
-		# check for knights in particular spots around the king
-
-	# generate the spaces immediately surrounding the king and store their direction as well - done
-	# cycle through each space - done
-		# if enemies are present, return array with direction, space, and type of piece - done
-			# check direction and type for check
-		# if not in check yet, check for empties
-			# if there are empties, generate spaces in that direction until there is a piece found
-				# if that piece is an enemy
-					# depending on the type, register true or false
-
-
+	def ranged_enemy_threat?(piece, direction)
+		if ['n', 's', 'e', 'w'].include?(direction) && [:queen, :rook].include?(piece.type)
+			return true
+		elsif ['ne', 'nw', 'se', 'sw'].include?(direction) && [:bishop, :queen].include?(piece.type)
+			return true
+		else
+			return false
+		end
+	end
 
 
 
@@ -359,6 +379,49 @@ class Chess_Game
 			return false
 		end
 	end
+
+	def rel_space(space, direction)
+		@game_board.board.relative_space(space, direction)
+	end
+
+	def get_knight_territory(center_space)
+
+		north = rel_space(center_space, 'n')
+		nnw = rel_space(north, 'nw')
+		nne = rel_space(north, 'ne')
+		nee = rel_space(rel_space(north, 'e'), 'e')
+		nww = rel_space(rel_space(north, 'w'), 'w')
+
+		south = rel_space(center_space, 's')
+		ssw = rel_space(south, 'sw')
+		sse = rel_space(south, 'se')
+		see = rel_space(rel_space(south, 'e'), 'e')
+		sww = rel_space(rel_space(south, 'w'), 'w')
+
+		output = [nnw, nne, nee, nww, ssw, sse, see, sww]
+
+	end
+
+
+	def lurking_knight?(king_space, king_team)
+		enemy_team = other_team(king_team)
+		knight_territory = get_knight_territory(king_space)
+		knight_territory.each do |space|
+			if space_occupied?(space)
+				if selection_is_enemy?(space)
+					return true if @game_board.board[space].type == :knight
+				end
+			end
+		end
+		return false
+
+	end
+
+	def is_border?(space)
+		@game_board.is_border?(space)
+	end
+
+
 
 
 end

@@ -10,8 +10,9 @@ class Board
 	attr_accessor :board
 	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8}
 	NUM_2_LET = LET_2_NUM.invert
-	CORNERS = corners = [:a1, :a8, :h1, :h8]
+	CORNERS = [:a1, :a8, :h1, :h8]
 	EDGES = [:a7, :a6, :a5, :a4, :a3, :a2, :b8, :c8, :d8, :e8, :f8, :g8, :h2, :h3, :h4, :h5, :h6, :h7, :b1, :c1, :d1, :e1, :f1, :g1]
+	BORDERS = CORNERS + EDGES
 	DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
 
 	def initialize
@@ -191,6 +192,15 @@ class Board
 		end
 		output.sort!
 	end
+
+	def is_border_space?(space)
+		BORDERS.include?(space)
+	end
+	
+
+
+
+
 
 
 end
