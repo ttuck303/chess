@@ -186,8 +186,8 @@ class Board
 	def get_surrounding_spaces(space)
 		output = []
 		DIRECTIONS.each do |dir|
-			result = relative_space(space, dir)
-			output << [dir.to_sym, result, nil] if result != "Out of bounds"
+			resulting_space = relative_space(space, dir)
+			output << [resulting_space, dir.to_sym] if resulting_space != "Out of bounds"
 		end
 		output.sort!
 	end
@@ -197,23 +197,7 @@ end
 
 
 
-#Testing get surrounding spaces 
 
-
-b = Board.new
-
-test1 = b.get_surrounding_spaces(:a1)
-test2 = b.get_surrounding_spaces(:f5)
-test3 = b.get_surrounding_spaces(:h1)
-test4 = b.get_surrounding_spaces(:g8)
-
-puts test1
-puts
-puts test2
-puts
-puts test3
-puts
-puts test4
 
 
 

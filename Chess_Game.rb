@@ -7,6 +7,7 @@ class Chess_Game
 
 	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8}
 	NUM_2_LET = LET_2_NUM.invert
+	DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
 
 	def initialize
 		@active_player = :white
@@ -105,6 +106,10 @@ class Chess_Game
 		@game_board.board[move].taken if @game_board.space_occupied?(move)
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
+	end
+
+	def get_piece_in_space(space)
+		@game_board.board[space]
 	end
 
 
@@ -248,12 +253,67 @@ class Chess_Game
 		end
 	end
 
-	def in_check?(team)
-		king_location = @board.king_location(team)
-		surrounding_spaces = @board.get_surrounding_spaces(king_location)
-		return true if adjacent_threat
+
+	def surrounding_spaces_and_pieces(space, kings_team) # return array with space, direction, and piece
+		enemy_team = other_team(kings_team)
+		enemies = []
+		vacancies = []
+
+		DIRECTIONS.each do |dir|
+			resulting_space = @game_board.board.relative_space(space, dir)
+			piece = get_piece_in_space(resulting_space) || "Empty"
+			piece_team = piece.team || "None"
+
+			if piece == "Empty"
+				vacancies << [resulting_space, dir.to_sym]
+			elsif piece_team == enemy_team
+				enemies << [resulting_space, dir.to_sym, piece]
+			end
+		end
+		return {:vacancies => vacancies, :enemies => enemies}
+			
+	end
+
+	def in_check?(kings_team)
+		king_location = @board.king_location(kings_team)
+		surrounding_space_information = surrounding_spaces_and_pieces(king_location)
+		enemies = surrounding_space_information[:enemies]
+		vacancies = surrounding_space_information[:vacancies]
+		return true if proximity_threat_check?(enemies)	
+		
 
 	end
+
+	# conflicted here between compartmentalizing functions and repeatedly looping over the same list
+	# the master loop is fairly small, but it will be called 2x per turn
+	# it seems like you could do all the things at once maybe
+
+	# what about stashing the arrays in the master method
+	# and calling sub methods for each function
+	# as long as you're not regenerating the loop over and over, you're just making the code more organized,
+	# not actually 
+
+	# lets create 2 arrays on the go that you will need, and then just stash them at first array and second array when returning
+
+	# if you run surrounding spaces in the Chess Game class, you can just get the people in it a the same time?
+
+
+	# generate a list of spots where an enemy knight could be around the king
+		# check for knights in particular spots around the king
+
+	# generate the spaces immediately surrounding the king and store their direction as well - done
+	# cycle through each space - done
+		# if enemies are present, return array with direction, space, and type of piece - done
+			# check direction and type for check
+		# if not in check yet, check for empties
+			# if there are empties, generate spaces in that direction until there is a piece found
+				# if that piece is an enemy
+					# depending on the type, register true or false
+
+
+
+
+
 
 	def other_team(team)
 		if team == :white
@@ -266,13 +326,39 @@ class Chess_Game
 	end
 
 
-
-	def adjacent_threat(spaces, origin, team)
-
+	def proximity_threat_check?(enemies_packet)
+		return false if enemies_packet.empty?
+		enemies_packet.each do |enemy_packet|
+			space = enemy_packet[0]
+			direction = enemy_packet[1]
+			piece = enemy_packet[2]
+			if proximity_threat?(piece, direction)
+				puts "#{piece.type} in space #{space} is casuing threat"
+				return true
+			end
+		end
+		return false
 	end
 
-
-
+	def proximity_threat?(piece, direction)
+		type = piece.type
+		case type
+		when :queen
+			return true
+		when :king
+			return true
+		when :rook
+			return true if [:n, :s, :e, :w].include?(direction)
+		when :bishop
+			return true if [:ne, :nw, :se, :sw].include?(direction)
+		when :pawn
+			team = piece.team
+			return true if (team == :white && [:se, :sw].include?(direction))
+			return true if (team == :black && [:ne, :nw].include?(direction))
+		when :knight
+			return false
+		end
+	end
 
 
 end
