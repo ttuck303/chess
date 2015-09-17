@@ -127,6 +127,8 @@ class Board
 	end
 
 	def left_column(column)
+		puts "Entering left column method"
+		puts "Argument = #{column}"
 		column = column.to_s[0]
 		return "Out of bounds" if column == 'a'
 		return NUM_2_LET[(LET_2_NUM[column]-1)]
@@ -145,7 +147,11 @@ class Board
 	end
 
 	def relative_space(origin, direction)
+		puts "Entering relative space method. Arguments:"
+		puts "origin = #{origin}, direction = #{direction}"
 		# directions include n, ne, e, se, s, sw, w, nw
+
+		return "Out of bounds" if origin == "Out of bounds"
 		origin = origin.to_s
 		column = origin[0]
 		row = origin[1].to_i

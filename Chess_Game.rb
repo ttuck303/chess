@@ -126,11 +126,15 @@ class Chess_Game
 	end
 
 	def selection_is_enemy?(selection)
-		!selection_is_on_active_team
+		!selection_is_on_active_team?(selection)
 	end
 
 	def destination_same_as_origin?(origin, destination)
 		origin == destination
+	end
+
+	def piece_on_team(piece, team)
+		return piece.team == team
 	end
 
 	def game_loop
@@ -278,6 +282,8 @@ class Chess_Game
 				enemies << [resulting_space, dir.to_sym, piece]
 			end
 		end
+		puts "returning vacancies = #{vacancies.inspect}"
+		puts "returning enemies = #{enemies.inspect}"
 		return {:vacancies => vacancies, :enemies => enemies}
 			
 	end
@@ -290,13 +296,27 @@ class Chess_Game
 		puts "Getting kings location..."
 		kings_location = locate_king(kings_team)
 		puts "Kings location found: #{kings_location}"
+		puts
 		puts "Getting surrounding space information...."
 		surrounding_space_information = surrounding_spaces_and_pieces(kings_location, kings_team)
+		puts "Completed surrounding information search."
+		puts
+
 		enemies = surrounding_space_information[:enemies]
 		vacancies = surrounding_space_information[:vacancies]
-		return true if proximity_threat_check?(enemies)	
+
+		puts "Enemies = #{enemies}"
+		puts "Vacancies = #{vacancies}"
+		return true if !enemies.empty? && proximity_threat_check?(enemies)
+		puts
+		puts "Checking for lurking knights..."	
 		return true if lurking_knight?(kings_location, kings_team)
-		return true if threat_from_gaps?(kings_location, vacancies, kings_team)
+		puts "Completed check for lurking knights"
+		puts
+		puts "Checking gaps threats..."
+		return true if !vacancies.empty? && threat_from_gaps?(kings_location, vacancies, kings_team)
+		puts "Completed checking for vaccanies"
+		puts "Not in check!"
 		return false
 
 	end
@@ -414,7 +434,10 @@ class Chess_Game
 		sww = rel_space(rel_space(south, 'w'), 'w')
 
 		output = [nnw, nne, nee, nww, ssw, sse, see, sww]
-
+		puts "original output = #{output}"
+		output.keep_if {|item| item != "Out of bounds"}
+		puts "new output = #{output}"
+		return output
 	end
 
 
@@ -422,10 +445,10 @@ class Chess_Game
 		enemy_team = other_team(king_team)
 		knight_territory = get_knight_territory(king_space)
 		knight_territory.each do |space|
+			puts "Inspecting space #{space}"
 			if space_occupied?(space)
-				if selection_is_enemy?(space)
-					return true if @game_board[space].type == :knight
-				end
+				piece = get_piece_in_space(space)
+				return true if piece.team == enemy_team && piece.type == :knight
 			end
 		end
 		return false
