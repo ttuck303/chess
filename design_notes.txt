@@ -165,10 +165,10 @@ Checking if a king is in check brainstorm
 approach:
 - check each space surrounding the king
 	- if enemy piece in immediate proximity of a certain type, you could be in check
-		- pawn diagonally
-		- rook in a 'perpendicular' space
+		- pawn diagonally (directionality matters on this one UGH)
+		- rook in any 'perpendicular' space
 		- queen in any space
-		- bishop diagonally
+		- bishop in any diagonal space
 		- king in any space
 	- if there are any gaps, extend out in a straight line until you see a piece
 		- if its an enemy of a certain type, you know you're in check
@@ -212,6 +212,10 @@ Maybe, the in check could return a list of possible moves for the king that woul
 Also need to create a list for the pieces that could block the threatening piece
 	- take the piece
 	- block the piece
+
+
+Note: would be more economical to cycle through the surrounding spaces of the king all in one go
+
 
 
 

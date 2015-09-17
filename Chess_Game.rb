@@ -251,7 +251,27 @@ class Chess_Game
 	def in_check?(team)
 		king_location = @board.king_location(team)
 		surrounding_spaces = @board.get_surrounding_spaces(king_location)
+		return true if adjacent_threat
+
 	end
+
+	def other_team(team)
+		if team == :white
+			:black
+		elsif team == :black
+			:white
+		else
+			"Error: unrecognized team"
+		end
+	end
+
+
+
+	def adjacent_threat(spaces, origin, team)
+
+	end
+
+
 
 
 

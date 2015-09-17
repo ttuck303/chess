@@ -187,13 +187,17 @@ class Board
 		output = []
 		DIRECTIONS.each do |dir|
 			result = relative_space(space, dir)
-			output << result if result != "Out of bounds"
+			output << [dir.to_sym, result, nil] if result != "Out of bounds"
 		end
 		output.sort!
 	end
 
 
 end
+
+
+
+#Testing get surrounding spaces 
 
 
 b = Board.new
@@ -210,6 +214,9 @@ puts
 puts test3
 puts
 puts test4
+
+
+
 
 
 

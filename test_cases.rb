@@ -107,3 +107,26 @@ puts test_board.relative_space(:h8, 'sw')
 puts test_board.relative_space(:b8, 'w')
 
 =end
+
+
+=begin 
+
+Testing get surrounding spaces 
+
+
+b = Board.new
+
+test1 = b.get_surrounding_spaces(:a1)
+test2 = b.get_surrounding_spaces(:f5)
+test3 = b.get_surrounding_spaces(:h1)
+test4 = b.get_surrounding_spaces(:g8)
+
+puts test1
+puts
+puts test2
+puts
+puts test3
+puts
+puts test4
+
+=end
