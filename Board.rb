@@ -17,7 +17,7 @@ class Board
 
 	def initialize
 		@board = blank_board
-		populate_new_board
+		#populate_new_board #commented out for debugging
 	end
 
 	def blank_board
@@ -179,7 +179,7 @@ class Board
 			return (left_column(column)+row.to_s).to_sym
 		when 'se'
 			return "Out of bounds" if column == 'h' || row == 1
-			return (column.succ + (row+1).to_s).to_sym
+			return (column.succ + (row-1).to_s).to_sym
 		when 'sw'
 			return "Out of bounds" if column == 'a' || row == 1
 			return (left_column(column)+(row-1).to_s).to_sym
@@ -204,11 +204,6 @@ class Board
 	def is_border_space?(space)
 		BORDERS.include?(space)
 	end
-
-
-
-
-
 
 
 end

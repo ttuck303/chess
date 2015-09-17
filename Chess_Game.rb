@@ -1,9 +1,10 @@
 require_relative 'Board'
 require_relative 'Piece'
 require_relative 'Pawn'
+require_relative 'King'
 
 class Chess_Game
-	attr_accessor :active_player
+	attr_accessor :active_player, :game_board #board is temp for debugging
 
 	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8}
 	NUM_2_LET = LET_2_NUM.invert
@@ -118,7 +119,7 @@ class Chess_Game
 	end
 
 	def space_occupied?(selection)
-		!@game_board[selection].nil?
+		!(@game_board[selection].nil?)
 	end
 
 	def selection_is_on_active_team?(selection)
@@ -259,33 +260,42 @@ class Chess_Game
 
 
 	def surrounding_spaces_and_pieces(space, kings_team) # return array with space, direction, and piece
-		puts "Entering surround spaces sub method"
+		# look in each direction
+		# if the space is out of bounds, skip it
+		# if the space is in bounds
+			# if the space is empty > add to vacancy list
+			# if the space is occupied by an enemy > add to enemy list
+
+
 		enemy_team = other_team(kings_team)
-		enemies = []
-		vacancies = []
+		enemy_spaces = []
+		vacant_spaces = []
+	
 
 		DIRECTIONS.each do |dir|
-			puts "Getting resulting space"
+			puts
+			puts "re enering the directions loop"
 			resulting_space = @game_board.relative_space(space, dir)
 			puts "resulting_space found = #{resulting_space}"
+			puts
 			if resulting_space != "Out of bounds"
-				piece = get_piece_in_space(resulting_space) 
-				piece_team = piece.team
-			else
-				piece = "None"
-				piece_team = "None"
-			end
-
-			if piece == "Empty"
-				vacancies << [resulting_space, dir.to_sym]
-			elsif piece_team == enemy_team
-				enemies << [resulting_space, dir.to_sym, piece]
+				if space_occupied?(resulting_space)
+					puts "#{resulting_space} space occupied..."
+					piece = get_piece_in_space(resulting_space)
+					puts "#{piece.type} found"
+					if piece.team == enemy_team
+						enemy_spaces <<  [resulting_space, dir.to_sym, piece]
+					end
+				else
+					puts "#{resulting_space} is vacant it says"
+					vacant_spaces << [resulting_space, dir.to_sym]
+				end
 			end
 		end
-		puts "returning vacancies = #{vacancies.inspect}"
-		puts "returning enemies = #{enemies.inspect}"
-		return {:vacancies => vacancies, :enemies => enemies}
-			
+
+		puts "returning vacancies = #{vacant_spaces.inspect}"
+		puts "returning enemies = #{enemy_spaces.inspect}"
+		return {:vacancies => vacant_spaces, :enemies => enemy_spaces}
 	end
 
 	def locate_king(kings_team)
@@ -314,7 +324,7 @@ class Chess_Game
 		puts "Completed check for lurking knights"
 		puts
 		puts "Checking gaps threats..."
-		return true if !vacancies.empty? && threat_from_gaps?(kings_location, vacancies, kings_team)
+		#return true if !vacancies.empty? && threat_from_gaps?(kings_location, vacancies, kings_team)
 		puts "Completed checking for vaccanies"
 		puts "Not in check!"
 		return false
@@ -340,7 +350,7 @@ class Chess_Game
 		return dir 
 	end
 
-	def threat_from_gaps?(king_location, gaps, king_team)
+	def threat_from_gaps?(king_location, gaps, kings_team)
 		enemy_team = other_team(kings_team)
 		gaps.each do |gap|
 			direction = calc_adjacent_direction(king_location, gap)
@@ -367,9 +377,6 @@ class Chess_Game
 		end
 	end
 
-
-
-
 	def other_team(team)
 		if team == :white
 			:black
@@ -388,7 +395,7 @@ class Chess_Game
 			direction = enemy_packet[1]
 			piece = enemy_packet[2]
 			if proximity_threat?(piece, direction)
-				puts "#{piece.type} in space #{space} is casuing threat"
+				puts "#{piece.type} in space #{space} is causing threat"
 				return true
 			end
 		end
@@ -468,14 +475,58 @@ end
 g = Chess_Game.new
 #g.game_loop
 
-g.in_check?(:white)
+#g.in_check?(:white)
 
 
 
+#checks for each type of check
+# adjacent threat
+	# pawn
+	# rook
+	# bishop
+	# king
+	# queen
+	# not knight
+# ranged threat
+	# pawn
+	# rook
+	# bishop
+	# king
+	# queen
+	# not knight
+# knights
+	# each spot
 
 
 
+# conditions for test
+	# in Chess_Game, allow accessor to board
+	# in Board, block populate new board
 
+test_board_1 = Board.new
+test_board_1.populate_space(:e8, King.new('black'))
+test_board_1.populate_space(:d7, Pawn.new('white'))
+g.game_board = test_board_1
+g.game_board.display_board
+puts g.in_check?(:black)
+
+# test 1 pawn confirmed
+
+test_board_2 = Board.new
+test_board_2.populate_space(:e8, King.new('black'))
+test_board_2.populate_space(:f7, Pawn.new('white'))
+g.game_board = test_board_2
+g.game_board.display_board
+puts g.in_check?(:black)
+
+# test 2 pawn confirmed
+puts "TEST 3"
+test_board_3 = Board.new
+test_board_3.populate_space(:e8, King.new('black'))
+test_board_3.populate_space(:e7, Pawn.new('white'))
+g.game_board = test_board_3
+g.game_board.display_board
+puts g.in_check?(:black)
 
 
 
