@@ -51,7 +51,7 @@ class Piece
 		true
 	end
 
-	def move
+	def moved!
 		@moved = true
 	end
 

@@ -106,6 +106,9 @@ class Chess_Game
 		# assumes that the checking logic has approved this move aleady
 		get_piece_in_space(move).taken if space_occupied?(move)
 		@game_board.populate_space(move, piece)
+		puts "Piece moved? #{piece.moved}"
+		piece.moved!
+		puts "Piece moved? #{piece.moved}"
 		@game_board.empty_space(origin)
 	end
 

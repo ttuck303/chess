@@ -2,6 +2,8 @@ require_relative 'Piece'
 
 class Pawn < Piece
 
+	attr_accessor :moved
+
 	def initialize(team)
 		super
 		@type = :pawn 
