@@ -233,3 +233,24 @@ Should use the simple helper method as early in the tree as you can.
 
 sloppy mixed use of strings and symbols for directions all over the place TODO FIX
 
+okay so in_check? method has been tested in a number of conditins (obviously not exchaustively)
+
+next steps (related to check):
+0. undo changes made in order to run test cases
+1. check a proposed move to see if it will put the character in check
+2. check a proposed move after it has been approved to see if it puts the other team in check
+3. use what you have to detect check mates
+4. if a team is in the check state, you need to prevent any moves that do not allow that user out of check
+
+and existing to do list, with remaining items, recopied here:
+
+3. write a method to convert a pawn to any desired piece if it reaches the opposite end of the board
+4. implement a way to play out whole games by entering game history
+5. refactor / clean up
+6. build some AI!
+7. connect with online chess API and start pwning n00bz
+8. display sidelined pieces
+9. make sure that the @moved? flag on pieces is updated properly
+
+
+

@@ -4,7 +4,7 @@ require_relative 'Pawn'
 require_relative 'King'
 
 class Chess_Game
-	attr_accessor :active_player, :game_board #board is temp for debugging
+	attr_accessor :active_player  #, :game_board #board is temp for debugging
 
 	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8}
 	NUM_2_LET = LET_2_NUM.invert
@@ -43,7 +43,7 @@ class Chess_Game
 			puts "That's not your team!"
 			return select_a_piece
 		else
-			piece = @game_board[choice]
+			piece = get_piece_in_space(choice)
 			puts "You have selected #{piece.type} in space #{choice.to_s}."
 		end
 		return [piece, choice]
@@ -104,7 +104,7 @@ class Chess_Game
 
 	def move_piece(origin, move, piece)
 		# assumes that the checking logic has approved this move aleady
-		@game_board[move].taken if @game_board.space_occupied?(move)
+		get_piece_in_space(move).taken if space_occupied?(move)
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
 	end
@@ -115,7 +115,7 @@ class Chess_Game
 
 
 	def on_board?(selection)
-		@game_board.has_key?(selection)
+		@game_board.on_board?(selection)
 	end
 
 	def space_occupied?(selection)
@@ -123,7 +123,7 @@ class Chess_Game
 	end
 
 	def selection_is_on_active_team?(selection)
-		@game_board[selection].team == @active_player
+		@game_board.board[selection].team == @active_player
 	end
 
 	def selection_is_enemy?(selection)
@@ -234,7 +234,7 @@ class Chess_Game
 			return false
 		else
 			spaces.each do |space|
-				return true if !@game_board[space].nil?
+				return true if space_occupied?(space)
 			end
 		end
 		return false

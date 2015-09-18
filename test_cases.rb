@@ -155,3 +155,101 @@ puts test4
 
 
 =end
+
+
+
+=begin
+	
+testing in-check method
+
+#checks for each type of check
+# adjacent threat
+	# pawn
+	# rook
+	# bishop
+	# king
+	# queen
+	# not knight
+# ranged threat
+	# pawn
+	# rook
+	# bishop
+	# king
+	# queen
+	# not knight
+# knights
+	# each spot
+
+
+
+# conditions for test
+	# in Chess_Game, allow accessor to board
+	# in Board, block populate new board
+
+test_board_1 = Board.new
+test_board_1.populate_space(:e8, King.new('black'))
+test_board_1.populate_space(:d7, Pawn.new('white'))
+g.game_board = test_board_1
+g.game_board.display_board
+puts g.in_check?(:black)
+
+# test 1 pawn confirmed
+
+test_board_2 = Board.new
+test_board_2.populate_space(:e8, King.new('black'))
+test_board_2.populate_space(:f7, Pawn.new('white'))
+g.game_board = test_board_2
+g.game_board.display_board
+puts g.in_check?(:black)
+
+# test 2 pawn confirmed
+
+puts "TEST 3"
+test_board_3 = Board.new
+test_board_3.populate_space(:e8, King.new('black'))
+test_board_3.populate_space(:e7, Pawn.new('white'))
+g.game_board = test_board_3
+g.game_board.display_board
+puts g.in_check?(:black)
+#test 3 confirmed
+
+puts "test 4"
+test_board_4 = Board.new
+test_board_4.populate_space(:e8, King.new('black'))
+test_board_4.populate_space(:e7, Bishop.new('white'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.in_check?(:black)
+
+
+puts "test 5"
+
+test_board_5 = Board.new
+test_board_5.populate_space(:e8, King.new('black'))
+test_board_5.populate_space(:e7, Queen.new('white'))
+g.game_board = test_board_5
+g.game_board.display_board
+puts g.in_check?(:black)
+
+puts "test 6"
+
+test_board_6 = Board.new
+test_board_6.populate_space(:e8, King.new('black'))
+test_board_6.populate_space(:e7, Rook.new('white'))
+g.game_board = test_board_6
+g.game_board.display_board
+puts g.in_check?(:black)
+
+puts "test 7"
+
+test_board_7 = Board.new
+test_board_7.populate_space(:e8, King.new('black'))
+test_board_7.populate_space(:d7, Rook.new('white'))
+g.game_board = test_board_7
+g.game_board.display_board
+puts g.in_check?(:black)
+
+=end
+
+
+
