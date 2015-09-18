@@ -484,17 +484,8 @@ end
 
 
 g = Chess_Game.new
-#g.game_loop
+g.game_loop
 
-#g.in_check?(:white)
-
-
-test_board_1 = Board.new
-test_board_1.populate_space(:e8, King.new('black'))
-test_board_1.populate_space(:a4, Queen.new('white'))
-g.game_board = test_board_1
-g.game_board.display_board
-puts g.in_check?(:black)
 
 
 
