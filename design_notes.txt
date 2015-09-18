@@ -226,7 +226,10 @@ Be more specific with HOW you are going to check for check
 update 9/17
 
 need to now create a bunch of test boards to debug the inevitable mess
+...
+this is a cluster. 
+Using "Out of bounds" when searching is a mess. 
+Should use the simple helper method as early in the tree as you can. 
 
-
-
+sloppy mixed use of strings and symbols for directions all over the place TODO FIX
 

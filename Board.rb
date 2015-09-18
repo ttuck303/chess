@@ -201,7 +201,7 @@ class Board
 		output.sort!
 	end
 
-	def is_border_space?(space)
+	def is_border?(space)
 		BORDERS.include?(space)
 	end
 

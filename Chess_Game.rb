@@ -324,7 +324,7 @@ class Chess_Game
 		puts "Completed check for lurking knights"
 		puts
 		puts "Checking gaps threats..."
-		#return true if !vacancies.empty? && threat_from_gaps?(kings_location, vacancies, kings_team)
+		return true if !vacancies.empty? && threat_from_gaps?(kings_location, vacancies, kings_team)
 		puts "Completed checking for vaccanies"
 		puts "Not in check!"
 		return false
@@ -350,17 +350,28 @@ class Chess_Game
 		return dir 
 	end
 
-	def threat_from_gaps?(king_location, gaps, kings_team)
+	def threat_from_gaps?(kings_location, gaps_packet, kings_team)
+		puts "Inputs: gaps #{gaps_packet.inspect}, kings location #{kings_location}, kings team #{kings_team}"
 		enemy_team = other_team(kings_team)
-		gaps.each do |gap|
-			direction = calc_adjacent_direction(king_location, gap)
-			space = gap
-			until space_occupied?(space) || is_border?(space)
-				if space_occupied?(space)
-					piece = get_piece_in_space(space)
-					if piece.team == enemy_team
-						return true if ranged_enemy_threat?(piece, direction)
-					end
+		gaps_packet.each do |packet|
+			puts 
+			puts "INSPECTING NEW GAP"
+			puts
+			gap_space = packet[0]
+			direction = packet[1].to_s
+			puts "Gap space = #{gap_space}"
+			puts "Direction = #{direction}"
+			puts "Direction type = #{direction.class}"
+
+			until space_occupied?(gap_space) || is_border?(gap_space)
+				gap_space = rel_space(gap_space, direction)
+				puts "Updating gap_space to #{gap_space}"
+			end
+
+			if space_occupied?(gap_space)
+				piece = get_piece_in_space(gap_space)
+				if piece.team == enemy_team
+					return true if ranged_enemy_threat?(piece, direction)
 				end
 			end
 		end
@@ -478,93 +489,16 @@ g = Chess_Game.new
 #g.in_check?(:white)
 
 
-
-#checks for each type of check
-# adjacent threat
-	# pawn
-	# rook
-	# bishop
-	# king
-	# queen
-	# not knight
-# ranged threat
-	# pawn
-	# rook
-	# bishop
-	# king
-	# queen
-	# not knight
-# knights
-	# each spot
-
-
-
-# conditions for test
-	# in Chess_Game, allow accessor to board
-	# in Board, block populate new board
-
 test_board_1 = Board.new
 test_board_1.populate_space(:e8, King.new('black'))
-test_board_1.populate_space(:d7, Pawn.new('white'))
+test_board_1.populate_space(:a4, Queen.new('white'))
 g.game_board = test_board_1
 g.game_board.display_board
 puts g.in_check?(:black)
 
-# test 1 pawn confirmed
-
-test_board_2 = Board.new
-test_board_2.populate_space(:e8, King.new('black'))
-test_board_2.populate_space(:f7, Pawn.new('white'))
-g.game_board = test_board_2
-g.game_board.display_board
-puts g.in_check?(:black)
-
-# test 2 pawn confirmed
-
-puts "TEST 3"
-test_board_3 = Board.new
-test_board_3.populate_space(:e8, King.new('black'))
-test_board_3.populate_space(:e7, Pawn.new('white'))
-g.game_board = test_board_3
-g.game_board.display_board
-puts g.in_check?(:black)
-#test 3 confirmed
-
-puts "test 4"
-test_board_4 = Board.new
-test_board_4.populate_space(:e8, King.new('black'))
-test_board_4.populate_space(:e7, Bishop.new('white'))
-g.game_board = test_board_4
-g.game_board.display_board
-puts g.in_check?(:black)
 
 
-puts "test 5"
 
-test_board_5 = Board.new
-test_board_5.populate_space(:e8, King.new('black'))
-test_board_5.populate_space(:e7, Queen.new('white'))
-g.game_board = test_board_5
-g.game_board.display_board
-puts g.in_check?(:black)
-
-puts "test 6"
-
-test_board_6 = Board.new
-test_board_6.populate_space(:e8, King.new('black'))
-test_board_6.populate_space(:e7, Rook.new('white'))
-g.game_board = test_board_6
-g.game_board.display_board
-puts g.in_check?(:black)
-
-puts "test 7"
-
-test_board_7 = Board.new
-test_board_7.populate_space(:e8, King.new('black'))
-test_board_7.populate_space(:d7, Rook.new('white'))
-g.game_board = test_board_7
-g.game_board.display_board
-puts g.in_check?(:black)
 
 
 
