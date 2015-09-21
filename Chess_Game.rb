@@ -31,6 +31,11 @@ class Chess_Game
 		return nil
 	end
 
+	def simple_move(origin, move, piece)
+		@game_board.populate_space(move, piece)
+		@game_board.empty_space(origin)
+	end
+
 
 	def get_player_move
 		temp = select_a_piece
@@ -526,7 +531,30 @@ class Chess_Game
 		@game_board.is_border?(space)
 	end
 
+	def checkmate?
+		return false if can_move_king?
+		return false if can_obstruct_threat?
+		return false if can_eliminate_threat?
+		return true
+	end
 
+	def can_move_king?
+		kings_location = locate_king(@active_player)
+		king = get_piece_in_space(kings_location)
+		adjacent_vacancies = surrounding_spaces_and_pieces(kings_location, @active_player)[:vacancies]
+		adjacent_vacancies.each do |move|
+			temp_board = @game_board.clone()
+			simple_move(kings_location, move, king)
+			return true unless in_check?(@active_player)
+		end
+		return false
+	end
+
+	def can_obstruct_threat?
+	end
+
+	def can_eliminate_threat?
+	end
 
 
 end

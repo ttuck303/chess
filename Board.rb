@@ -24,8 +24,6 @@ class Board
 		@board.has_key?(space)
 	end
 
-
-
 	def blank_board
 		board = {}
 		for i in Range.new('a', 'h')
