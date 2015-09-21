@@ -135,6 +135,10 @@ class Chess_Game
 	def game_loop
 		until game_over?
 			@game_board.display_board
+
+			puts "checking if the active team is now in check..."
+			puts "You are in check" if in_check?(@active_player)
+
 			puts "proposing move..."
 			propose_move
 			puts "move proposed"

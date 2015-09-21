@@ -291,3 +291,57 @@ realized that there is at least one fatal flaw in how i determine if a piece is 
 	- when I check that a space is an edge space, I failed to consider the scenario where the examination path runs along an edge
 		- to fix this, I must build in a way to continue propagation in a single direction until OFF the Board, and only then end the search in that direction. This will involve the relative space method of board. I already have it return "Out of bounds" once its reached that point, so maybe try making that the end condition...
 			- after fixing this bug, I can come back to making sure that pieces cannot move into check
+
+seems to work, will need more extensive testing soon, but would like to move on now..
+
+Checking if the new active team is in check
+	in_check? will quickly tell us if we are in check
+	but what to do if this is true?
+		the move into check loop should catch situations where the piece has not moved out of check yet - how nice! so all we really need to do is remind the active player that they are in check at the beginning of their turn
+
+how to check for check mate?
+	- the brute force method would be to check each move possibility, but that seems like a dumb and complicated way to do it.... 
+	- maybe a tree of sorts... you know from in_check? where the threat is coming from, so you could construct a tree to search which may speed up the brute force method?
+		- check king movements first to see if there are any spaces where the king can move to avoid check
+		- check ways to block the incoming threat
+			- this is a lot of hypothetical board scenarios... which would mean a lot of setting and resetting of purgatory
+			- doesn't seem like the smartest way to do this
+		- check ways to take the incoming threat
+		- if no other ways, then checkm8
+
+
+	- how else would you do it besides checking all possibilities?
+		- storing all possible checkm8 scenarios is probably out of the question
+		- maybe there is some level of abstraction between all move possibilities and all check mates, like patterns or type of check mates?
+
+
+Check for checkm8 when in check
+copying fake boards may not be that bad
+
+start off with existing board
+
+Avoidance Strategy 1: Move the King
+
+get list of king's possible moves (similar to generating the surrounding spaces list as before)
+create a board copy for each move
+make the move on the copied board
+check each board for check
+if even one comes out as a safe move, then not check m8 and continue with the game
+if all moves are exhausted without moving the king to safety, enter obstruction check
+
+Avoidance Strategy 2: Obstruction of Threat
+if the threat is a knight, just move on to the next strategy because knights can fly
+know where the threat is coming from (at least 1 source)
+know the path between the king and the threat
+know all the pieces on the king's team
+try to move each piece onto each part of that path (dumb way, but it would work)
+	- can this get smarter?
+		- use path characteristics to help
+			- is it a diagonal, vertical, or horizontal path?
+			- how far is the piece from the closest space in the path?
+
+Avoidance Strategy 3: Eliminate the Threat
+
+
+
+
