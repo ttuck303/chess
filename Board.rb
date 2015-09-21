@@ -17,7 +17,7 @@ class Board
 
 	def initialize
 		@board = blank_board
-		populate_new_board #commented out for debugging
+		#populate_new_board #commented out for debugging
 	end
 
 	def on_board?(space)

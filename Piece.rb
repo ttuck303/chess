@@ -1,5 +1,5 @@
 class Piece
-	attr_accessor :team, :type, :symbol
+	attr_accessor :team, :type, :symbol, :moved
 
 	def initialize(team)
 		@team = team.to_sym

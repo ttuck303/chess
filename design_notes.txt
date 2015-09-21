@@ -245,12 +245,49 @@ next steps (related to check):
 and existing to do list, with remaining items, recopied here:
 
 3. write a method to convert a pawn to any desired piece if it reaches the opposite end of the board
-4. implement a way to play out whole games by entering game history
+4. implement a way to play out whole games by entering game history (and store game history)
 5. refactor / clean up
 6. build some AI!
 7. connect with online chess API and start pwning n00bz
 8. display sidelined pieces
 9. make sure that the @moved? flag on pieces is updated properly
 
+Back to in check - when testing a move to make sure you are not moving into check, i realized that many of the helper methods pull data from the actual active board... 
+Which is the less painful route:
+1. create a hypothetical future board based on the board and feed it into each of the helper methods
+2. make the move on the actual board, and then if it is in check, undo the move and ask for a different move
+
+option 1 seems like a whole lot more work -> lets see what we can to for option 2
+
+detects it, but need to try a different move
+hmm... if I do it this way, undoing the move is really hard because I have to figure out how to untake a piece if it was taken and how to unmove a piece if it was moved.... maybe there should be a "move consequences" method to happen only after the move is approved.
+Still need a way to take a piece temporarily... Do you? Is there ever a case where the elimination of another piece will impact the check? Its not the taking that would put you in check, its the movement of your player. Unless its the king himself being moved, then it could get messy.
+Could pass a piece as "pending death" and remove it temporarily from the board.
 
 
+
+
+get proposed move
+	any taken pieces go to "purgatory" -> off board but not yet taken
+	original spaces stored in "purgatory"
+	run in_check?
+		if true (in check) undo purgatory: return pieces to original spaces
+		if false: complete move
+			taken pieces in purgatory
+			moved flags updated
+	purgatory is a state variable with following 'slots'
+		- piece to be taken
+		- piece to be taken's board space
+		- piece to move
+		- piece to move's origin space
+
+
+------
+
+update 9/21/2015
+
+split movement into different steps, with a test of the check status in the middle
+realized that there is at least one fatal flaw in how i determine if a piece is in check or not:
+	- when I check that a space is an edge space, I failed to consider the scenario where the examination path runs along an edge
+		- to fix this, I must build in a way to continue propagation in a single direction until OFF the Board, and only then end the search in that direction. This will involve the relative space method of board. I already have it return "Out of bounds" once its reached that point, so maybe try making that the end condition...
+			- after fixing this bug, I can come back to making sure that pieces cannot move into check

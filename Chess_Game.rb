@@ -4,7 +4,7 @@ require_relative 'Pawn'
 require_relative 'King'
 
 class Chess_Game
-	attr_accessor :active_player  #, :game_board #board is temp for debugging
+	attr_accessor :active_player, :game_board #board is temp for debugging
 
 	LET_2_NUM = {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8}
 	NUM_2_LET = LET_2_NUM.invert
@@ -13,7 +13,24 @@ class Chess_Game
 	def initialize
 		@active_player = :white
 		@game_board = Board.new
+		@purgatory = clear_purgatory_hash
 	end
+
+	def clear_purgatory_hash
+		puts 'clearing purgatory'
+		{:taken_piece => nil, :attacking_piece_move => nil, :attacking_piece => nil, :attacking_piece_origin => nil}
+	end
+
+	def stash_in_purgatory(origin, move, piece)
+		puts "stashing in purgatory"
+		@purgatory[:attacking_piece] = piece
+		@purgatory[:attacking_piece_origin] = origin
+		@purgatory[:attacking_piece_move] = move
+		@purgatory[:taken_piece] = get_piece_in_space(move)
+		puts "purgatory now = #{@purgatory.inspect}"
+		return nil
+	end
+
 
 	def get_player_move
 		temp = select_a_piece
@@ -24,7 +41,7 @@ class Chess_Game
 			move = enter_desired_move
 			return get_player_move if move.to_s.downcase == 'o'
 		end
-		puts "Moving #{piece} from #{origin} to #{move}."
+		#puts "Moving #{piece} from #{origin} to #{move}."
 		[origin, move, piece] # return a piece and the legal move
 	end
 
@@ -61,10 +78,6 @@ class Chess_Game
 	end
 
 	def legal_move?(origin, move, piece)
-		#puts "Debug: "
-		#puts "Piece = #{piece}"
-		#puts "Origin = #{origin}"
-		#puts "Move = #{move}"
 
 		if !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
@@ -79,20 +92,9 @@ class Chess_Game
 			return false
 		elsif violates_special_cases?(origin, move, piece)
 			return false
-
 		else
 			return true
 		end
-	 
-		
-			# check acceptable "difference" in row and column
-			# check the piece is not "flying" over other pieces
-			# edge cases:
-				# knights can fly
-				# rook / king can castle
-				# pawn can move 2 on first go
-				# pawn can take an opponent in a diagonal spot
-				# check that the move would not move the King into check
 	end
 
 	def allowed_piece_movement?(origin, move, piece)
@@ -101,18 +103,7 @@ class Chess_Game
 		piece.acceptable_move?(x_diff, y_diff)
 	end
 
-
-	def move_piece(origin, move, piece)
-		# assumes that the checking logic has approved this move aleady
-		get_piece_in_space(move).taken if space_occupied?(move)
-		@game_board.populate_space(move, piece)
-		puts "Piece moved? #{piece.moved}"
-		piece.moved!
-		puts "Piece moved? #{piece.moved}"
-		@game_board.empty_space(origin)
-	end
-
-	def get_piece_in_space(space)
+	def get_piece_in_space(space) # gets the piece or returns nil if there is none
 		@game_board.get_piece_in_space(space)
 	end
 
@@ -144,11 +135,62 @@ class Chess_Game
 	def game_loop
 		until game_over?
 			@game_board.display_board
-			move_info = get_player_move
-			move_piece(move_info[0], move_info[1], move_info[2])
+			puts "proposing move..."
+			propose_move
+			puts "move proposed"
+			puts "Active team = #{@active_player}"
+			puts "In check status: #{in_check?(@active_player)}"
+			until !in_check?(@active_player)
+				puts "You cannot move into check. Please enter a differrent move."
+				restore_prev_board_state
+				propose_move
+			end
+			puts "no errors found, completing move"
+			complete_proposed_move
+			puts "switching team"
 			switch_team
 		end
 	end
+
+	def propose_move
+		move_info = get_player_move
+		move_piece_phase_1(move_info[0], move_info[1], move_info[2])
+	end
+
+	def restore_prev_board_state # undo the move by putting pieces back where they were on the board and clearing purgatory
+		origin = @purgatory[:attacking_piece_origin]
+		move = @purgatory[:attacking_piece_move]
+		attacking_piece = @purgatory[:attacking_piece]
+		taken_piece = @purgatory[:taken_piece]
+
+		@game_board.empty_space(move)
+		@game_board.populate_space(origin, attacking_piece)
+		@game_board.populate_space(move, taken_piece)
+
+
+	end
+
+	def move_piece_phase_1(origin, move, piece) # moving pieces and stashing move info in hash
+		stash_in_purgatory(origin, move, piece)
+		@game_board.empty_space(move)
+		@game_board.populate_space(move, piece)
+		@game_board.empty_space(origin)
+	end
+
+
+	def empty_space(space)
+		@game_board.empty_space(space)
+	end
+
+
+	def complete_proposed_move # finalizing the move by clearing the purgatory
+		@purgatory[:taken_piece].taken unless @purgatory[:taken_piece].nil?
+		@purgatory[:attacking_piece].moved!
+		@purgatory = clear_purgatory_hash
+
+	end
+
+
 
 	def space_occupied?(space)
 		@game_board.space_occupied?(space)
@@ -366,7 +408,7 @@ class Chess_Game
 			puts "Direction = #{direction}"
 			puts "Direction type = #{direction.class}"
 
-			until space_occupied?(gap_space) || is_border?(gap_space)
+			until space_occupied?(gap_space) || gap_space == "Out of bounds" #fatal bug: checking for border is not sufficient because you can travel along border
 				gap_space = rel_space(gap_space, direction)
 				puts "Updating gap_space to #{gap_space}"
 			end
@@ -487,12 +529,19 @@ end
 
 
 g = Chess_Game.new
+#g.game_loop
+puts "test 8"
+test_board_8 = Board.new 
+test_board_8.populate_space(:e8, King.new('black'))
+test_board_8.populate_space(:d8, Rook.new('black'))
+test_board_8.populate_space(:a1, King.new('white'))
+test_board_8.populate_space(:a8, Queen.new('white'))
+test_board_8.populate_space(:d5, Pawn.new('white'))
+
+g.game_board = test_board_8
+g.game_board.display_board
+
 g.game_loop
-
-
-
-
-
 
 
 
