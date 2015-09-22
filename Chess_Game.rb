@@ -13,11 +13,63 @@ class Chess_Game
 	def initialize
 		@active_player = :white
 		@game_board = Board.new
+		populate_new_board
 		@purgatory = clear_purgatory_hash
+		@white_team = []
+		@black_team = []
+		@game_status = :no_restrictions
+	end
+
+	def populate_new_board #TO DO: refactor to be more concise
+		for i in 'a'..'h'
+			populate_space((i+'2').to_sym, Pawn.new('white'))
+			populate_space((i+'7').to_sym, Pawn.new('black'))
+		end
+		populate_space(:a1, Rook.new('white'))
+		populate_space(:b1, Knight.new('white'))
+		populate_space(:c1, Bishop.new('white'))
+		populate_space(:d1, Queen.new('white'))
+		populate_space(:e1, King.new('white'))
+		populate_space(:f1, Bishop.new('white'))
+		populate_space(:g1, Knight.new('white'))
+		populate_space(:h1, Rook.new('white'))
+
+		populate_space(:a8, Rook.new('black'))
+		populate_space(:b8, Knight.new('black'))
+		populate_space(:c8, Bishop.new('black'))
+		populate_space(:d8, Queen.new('black'))
+		populate_space(:e8, King.new('black'))
+		populate_space(:f8, Bishop.new('black'))
+		populate_space(:g8, Knight.new('black'))
+		populate_space(:h8, Rook.new('black'))
+		return nil
+	end
+
+	def populate_team_tracker
+		white = []
+		black = []
+		for letter in range ('a'..'h')
+			for num in range (1..2)
+				space = (letter+num.to_s).to_sym
+				piece = get_piece_in_space(space)
+				white << piece
+			end
+			for num in range (7..8)
+				space = (letter+num.to_s).to_sym
+				piece = get_piece_in_space(space)
+				black << piece
+			end
+		end
+		@white_team = white
+		@black_team = black
+		return nil
+	end
+
+	def populate_space(space, piece)
+		@game_board.populate_space(space, piece)
 	end
 
 	def clear_purgatory_hash
-		puts 'clearing purgatory'
 		{:taken_piece => nil, :attacking_piece_move => nil, :attacking_piece => nil, :attacking_piece_origin => nil}
 	end
 
@@ -27,11 +79,11 @@ class Chess_Game
 		@purgatory[:attacking_piece_origin] = origin
 		@purgatory[:attacking_piece_move] = move
 		@purgatory[:taken_piece] = get_piece_in_space(move)
-		puts "purgatory now = #{@purgatory.inspect}"
+		puts "Purgatory = #{@purgatory.inspect}"
 		return nil
 	end
 
-	def simple_move(origin, move, piece)
+	def make_simple_move(origin, move, piece)
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
 	end
@@ -46,12 +98,11 @@ class Chess_Game
 			move = enter_desired_move
 			return get_player_move if move.to_s.downcase == 'o'
 		end
-		#puts "Moving #{piece} from #{origin} to #{move}."
 		[origin, move, piece] # return a piece and the legal move
 	end
 
 	def select_a_piece
-		puts "Select a piece to move by indicating the space of the piece ('a1' thru 'h8')"
+		puts "#{@active_player} select a piece to move ('a1' thru 'h8')"
 		choice = gets.strip.to_sym
 		piece = nil
 	
@@ -138,30 +189,24 @@ class Chess_Game
 	end
 
 	def game_loop
-		until game_over?
+		until @game_status == :checkmate
 			@game_board.display_board
-
-			puts "checking if the active team is now in check..."
-			puts "You are in check" if in_check?(@active_player)
-
-			puts "proposing move..."
+			puts "#{@active_player} you are in check!" if in_check?(@active_player)
 			propose_move
-			puts "move proposed"
-			puts "Active team = #{@active_player}"
-			puts "In check status: #{in_check?(@active_player)}"
 			until !in_check?(@active_player)
-				puts "You cannot move into check. Please enter a differrent move."
+				puts "You are still in check. Please enter a differrent move."
 				restore_prev_board_state
+				@game_board.display_board
 				propose_move
 			end
-			puts "no errors found, completing move"
 			complete_proposed_move
-			puts "switching team"
 			switch_team
 		end
 	end
 
 	def propose_move
+		puts
+		puts "proposing move..."
 		move_info = get_player_move
 		move_piece_phase_1(move_info[0], move_info[1], move_info[2])
 	end
@@ -175,15 +220,16 @@ class Chess_Game
 		@game_board.empty_space(move)
 		@game_board.populate_space(origin, attacking_piece)
 		@game_board.populate_space(move, taken_piece)
-
-
 	end
 
 	def move_piece_phase_1(origin, move, piece) # moving pieces and stashing move info in hash
+		puts "Moving phase 1"
 		stash_in_purgatory(origin, move, piece)
 		@game_board.empty_space(move)
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
+		puts "temporary game board being evaluated:"
+		@game_board.display_board
 	end
 
 
@@ -196,7 +242,6 @@ class Chess_Game
 		@purgatory[:taken_piece].taken unless @purgatory[:taken_piece].nil?
 		@purgatory[:attacking_piece].moved!
 		@purgatory = clear_purgatory_hash
-
 	end
 
 
@@ -301,7 +346,12 @@ class Chess_Game
 	end
 
 	def game_over?
-		false
+		if in_check?(@active_player)
+			if checkmate?
+				return true
+			end
+		end
+		return false
 	end
 
 	def switch_team
@@ -314,41 +364,23 @@ class Chess_Game
 
 
 	def surrounding_spaces_and_pieces(space, kings_team) # return array with space, direction, and piece
-		# look in each direction
-		# if the space is out of bounds, skip it
-		# if the space is in bounds
-			# if the space is empty > add to vacancy list
-			# if the space is occupied by an enemy > add to enemy list
-
-
 		enemy_team = other_team(kings_team)
 		enemy_spaces = []
 		vacant_spaces = []
-	
 
 		DIRECTIONS.each do |dir|
-			puts
-			puts "re enering the directions loop"
 			resulting_space = @game_board.relative_space(space, dir)
-			puts "resulting_space found = #{resulting_space}"
-			puts
 			if resulting_space != "Out of bounds"
 				if space_occupied?(resulting_space)
-					puts "#{resulting_space} space occupied..."
 					piece = get_piece_in_space(resulting_space)
-					puts "#{piece.type} found"
 					if piece.team == enemy_team
 						enemy_spaces <<  [resulting_space, dir.to_sym, piece]
 					end
 				else
-					puts "#{resulting_space} is vacant it says"
 					vacant_spaces << [resulting_space, dir.to_sym]
 				end
 			end
 		end
-
-		puts "returning vacancies = #{vacant_spaces.inspect}"
-		puts "returning enemies = #{enemy_spaces.inspect}"
 		return {:vacancies => vacant_spaces, :enemies => enemy_spaces}
 	end
 
@@ -357,32 +389,16 @@ class Chess_Game
 	end
 
 	def in_check?(kings_team)
-		puts "Getting kings location..."
 		kings_location = locate_king(kings_team)
-		puts "Kings location found: #{kings_location}"
-		puts
-		puts "Getting surrounding space information...."
 		surrounding_space_information = surrounding_spaces_and_pieces(kings_location, kings_team)
-		puts "Completed surrounding information search."
-		puts
-
 		enemies = surrounding_space_information[:enemies]
 		vacancies = surrounding_space_information[:vacancies]
 
-		puts "Enemies = #{enemies}"
-		puts "Vacancies = #{vacancies}"
-		return true if !enemies.empty? && proximity_threat_check?(enemies)
-		puts
-		puts "Checking for lurking knights..."	
-		return true if lurking_knight?(kings_location, kings_team)
-		puts "Completed check for lurking knights"
-		puts
-		puts "Checking gaps threats..."
-		return true if !vacancies.empty? && threat_from_gaps?(kings_location, vacancies, kings_team)
-		puts "Completed checking for vaccanies"
-		puts "Not in check!"
-		return false
 
+		return true if !enemies.empty? && proximity_threat_check?(enemies)[0]
+		return true if lurking_knight?(kings_location, kings_team)[0]
+		return true if !vacancies.empty? && threat_from_gaps?(kings_location, vacancies, kings_team)[0]
+		return false
 	end
 
 	def calc_adjacent_direction(origin, move) #between adjacent squares only!
@@ -405,40 +421,50 @@ class Chess_Game
 	end
 
 	def threat_from_gaps?(kings_location, gaps_packet, kings_team)
-		puts "Inputs: gaps #{gaps_packet.inspect}, kings location #{kings_location}, kings team #{kings_team}"
 		enemy_team = other_team(kings_team)
 		gaps_packet.each do |packet|
-			puts 
-			puts "INSPECTING NEW GAP"
-			puts
 			gap_space = packet[0]
 			direction = packet[1].to_s
-			puts "Gap space = #{gap_space}"
-			puts "Direction = #{direction}"
-			puts "Direction type = #{direction.class}"
-
 			until space_occupied?(gap_space) || gap_space == "Out of bounds" #fatal bug: checking for border is not sufficient because you can travel along border
 				gap_space = rel_space(gap_space, direction)
-				puts "Updating gap_space to #{gap_space}"
 			end
 
 			if space_occupied?(gap_space)
 				piece = get_piece_in_space(gap_space)
 				if piece.team == enemy_team
-					return true if ranged_enemy_threat?(piece, direction)
+					return [true, piece, direction] if ranged_enemy_threat?(piece, direction)
 				end
 			end
 		end
-		return false
+		return [false]
+	end
+
+	def get_threat_path(kings_location, kings_team, gaps_packet)
+		gaps_packet.each do |packet|
+			gap_space = packet[0]
+			direction = packet[1].to_s
+			until space_occupied?(gap_space) || gap_space == "Out of bounds" #fatal bug: checking for border is not sufficient because you can travel along border
+				gap_space = rel_space(gap_space, direction)
+			end
+			if space_occupied?(gap_space)
+				piece = get_piece_in_space(gap_space)
+				if piece.team == enemy_team
+					if ranged_enemy_threat?(piece, direction)
+						return [piece, direction]
+					end
+				end
+			end
+		end
+		
 	end
 
 	def ranged_enemy_threat?(piece, direction)
 		if ['n', 's', 'e', 'w'].include?(direction) && [:queen, :rook].include?(piece.type)
-			return true
+			return [true, piece, direction]
 		elsif ['ne', 'nw', 'se', 'sw'].include?(direction) && [:bishop, :queen].include?(piece.type)
-			return true
+			return [true, piece, direction]
 		else
-			return false
+			return [false]
 		end
 	end
 
@@ -454,17 +480,17 @@ class Chess_Game
 
 
 	def proximity_threat_check?(enemies_packet)
-		return false if enemies_packet.empty?
+		return [false] if enemies_packet.empty?
 		enemies_packet.each do |enemy_packet|
 			space = enemy_packet[0]
 			direction = enemy_packet[1]
 			piece = enemy_packet[2]
 			if proximity_threat?(piece, direction)
 				puts "#{piece.type} in space #{space} is causing threat"
-				return true
+				return [true, piece, direction]
 			end
 		end
-		return false
+		return [false]
 	end
 
 	def proximity_threat?(piece, direction)
@@ -506,9 +532,7 @@ class Chess_Game
 		sww = rel_space(rel_space(south, 'w'), 'w')
 
 		output = [nnw, nne, nee, nww, ssw, sse, see, sww]
-		puts "original output = #{output}"
 		output.keep_if {|item| item != "Out of bounds"}
-		puts "new output = #{output}"
 		return output
 	end
 
@@ -517,14 +541,12 @@ class Chess_Game
 		enemy_team = other_team(king_team)
 		knight_territory = get_knight_territory(king_space)
 		knight_territory.each do |space|
-			puts "Inspecting space #{space}"
 			if space_occupied?(space)
 				piece = get_piece_in_space(space)
-				return true if piece.team == enemy_team && piece.type == :knight
+				return [true, space, piece] if piece.team == enemy_team && piece.type == :knight
 			end
 		end
-		return false
-
+		return [false]
 	end
 
 	def is_border?(space)
@@ -544,16 +566,27 @@ class Chess_Game
 		adjacent_vacancies = surrounding_spaces_and_pieces(kings_location, @active_player)[:vacancies]
 		adjacent_vacancies.each do |move|
 			temp_board = @game_board.clone()
-			simple_move(kings_location, move, king)
+			make_simple_move(kings_location, move, king)
 			return true unless in_check?(@active_player)
 		end
 		return false
 	end
 
-	def can_obstruct_threat?
+	def can_obstruct_threat?(kings_team = @active_player, kings_location, vaccancies)
+		# get the path between the threat and the king -> sub method
+		path = get_threat_path(kings_location, kings_team, vacancies) if threat_from_gaps?(kings_location, vaccancies, kings_team)
+		# get the active teams remaining pieces (how?) -> may need to keep track of the pieces on each team from the get-go (faster than scanning the board for remaining pieces each time)
+		# for each piece, try to move to each spot on the path
+			# check for legal move
+				# if move completes legally, check for in check
+					# if not in check, then return true
+		# else return false
+
+		return false
 	end
 
 	def can_eliminate_threat?
+		return false
 	end
 
 
@@ -561,18 +594,6 @@ end
 
 
 g = Chess_Game.new
-#g.game_loop
-puts "test 8"
-test_board_8 = Board.new 
-test_board_8.populate_space(:e8, King.new('black'))
-test_board_8.populate_space(:d8, Rook.new('black'))
-test_board_8.populate_space(:a1, King.new('white'))
-test_board_8.populate_space(:a8, Queen.new('white'))
-test_board_8.populate_space(:d5, Pawn.new('white'))
-
-g.game_board = test_board_8
-g.game_board.display_board
-
 g.game_loop
 
 

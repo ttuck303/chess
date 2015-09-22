@@ -46,32 +46,6 @@ class Board
 		@board[space] = nil
 	end
 
-
-	def populate_new_board #TO DO: refactor to be more concise
-		for i in 'a'..'h'
-			populate_space((i+'2').to_sym, Pawn.new('white'))
-			populate_space((i+'7').to_sym, Pawn.new('black'))
-		end
-		populate_space(:a1, Rook.new('white'))
-		populate_space(:b1, Knight.new('white'))
-		populate_space(:c1, Bishop.new('white'))
-		populate_space(:d1, Queen.new('white'))
-		populate_space(:e1, King.new('white'))
-		populate_space(:f1, Bishop.new('white'))
-		populate_space(:g1, Knight.new('white'))
-		populate_space(:h1, Rook.new('white'))
-
-		populate_space(:a8, Rook.new('black'))
-		populate_space(:b8, Knight.new('black'))
-		populate_space(:c8, Bishop.new('black'))
-		populate_space(:d8, Queen.new('black'))
-		populate_space(:e8, King.new('black'))
-		populate_space(:f8, Bishop.new('black'))
-		populate_space(:g8, Knight.new('black'))
-		populate_space(:h8, Rook.new('black'))
-		return nil
-	end
-
 	def get_column(space)
 		space.to_s[0]
 	end
@@ -131,8 +105,6 @@ class Board
 	end
 
 	def left_column(column)
-		puts "Entering left column method"
-		puts "Argument = #{column}"
 		column = column.to_s[0]
 		return "Out of bounds" if column == 'a'
 		return NUM_2_LET[(LET_2_NUM[column]-1)]
@@ -140,7 +112,6 @@ class Board
 
 	def locate_king(team)
 		@board.each_pair do |space, piece|
-			puts "Space = #{space}, piece = #{piece}"
 			if !piece.nil?
 				if (piece.type == :king) && (piece.team == team)
 					return space
@@ -151,8 +122,6 @@ class Board
 	end
 
 	def relative_space(origin, direction)
-		puts "Entering relative space method. Arguments:"
-		puts "origin = #{origin}, direction = #{direction}"
 		# directions include n, ne, e, se, s, sw, w, nw
 
 		return "Out of bounds" if origin == "Out of bounds"

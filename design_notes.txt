@@ -326,10 +326,11 @@ get list of king's possible moves (similar to generating the surrounding spaces 
 create a board copy for each move
 make the move on the copied board
 check each board for check
-if even one comes out as a safe move, then not check m8 and continue with the game
+if even one comes out as a safe momcve, then not check m8 and continue with the game
 if all moves are exhausted without moving the king to safety, enter obstruction check
 
 Avoidance Strategy 2: Obstruction of Threat
+
 if the threat is a knight, just move on to the next strategy because knights can fly
 know where the threat is coming from (at least 1 source)
 know the path between the king and the threat
@@ -341,6 +342,66 @@ try to move each piece onto each part of that path (dumb way, but it would work)
 			- how far is the piece from the closest space in the path?
 
 Avoidance Strategy 3: Eliminate the Threat
+
+
+
+note: we are repeating the work of finding the bad guy in Strategy 2, not DRY code :/ TODO refactor later
+
+
+overloaded mentally because you are trying to do too many things at once
+break it down and do one thing at a time
+
+get path between king and threat
+	locate king -> method for this, or pass it in
+	locate threat
+		get the vacancies around the king -> method for this -> passed in with argument
+		run a method to locate the source of the thread -> just modify the existing method that checks for ranged threats
+	get path between the two spaces -> should be simple submethod for this, if not write it
+
+get the active pieces on a team
+	start off the game by storing them
+	any time a piece is taken, update this array 
+	doiuble loop through active pieces and the threat_path
+		if you can move a piece onto the threat path and the results are no check,
+			return true
+return false
+
+
+
+--- 
+decided that I don't want to repeat these methods so many times, so rather than have an in_check, a checkmate, etc.
+just do it all in one big method that makes calls to smaller methods
+and return a status variable :in_check, :checkmate, :no_restrictions
+and then there will be a similar but smaller method that will check for move_into_check? using similar sub methods
+
+game_status
+	get active team
+	get kings location
+	get info about spaces to the king, namely
+		vacancies (list of spaces with the direction that they're in relative to the king)
+		enemies (list of spaces with the direction and the piece)
+	run in_check?
+		checks immediately surrounding spaces
+			if true, return boolean, as well as the piece and the space that its in
+		checks knight area
+			if found, return boolean true as well as the piece and the space that its in
+		checks distance spaces
+			if it finds a threat in the distance spaces, it should return boolean true, along with the space and the space's occupant
+	if not in check, return status of normal (WHAT ABOUT STALEMATE :/ ) come back to stalemate :/
+	if in check, check for check mate
+		way 1 (listed above)
+		way 2
+		way 3 
+	if not in checkmate, jsut in check, return that information
+	if in checkmate, game over.
+	if in stalemate, game over.
+
+----
+9/22/2015
+
+Thought I found a bug where killing a knight that was causing check didn't end the check but I could not replicate it - keep an eye out for it. 
+
+Check seems to be working, now need to check for check mate
 
 
 
