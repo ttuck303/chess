@@ -404,5 +404,19 @@ Thought I found a bug where killing a knight that was causing check didn't end t
 Check seems to be working, now need to check for check mate
 
 
+mega method update_game_status
+looks at board, specifically spaces surrounding king
+runs three tests to see if the king is in check
+if it is in check, runs three more tests to see if its in check mate
+	it probably make sense to run particular tests depending on the type of check
+		ie if its from a knight, you cannot block, but you can move the king or kill the knight
+		if its ranged attack, you can do all 3
+		if its close attack, you can kill or move, but not obstruct
+ultimately, return the game state and a packet with the threatening piece and the space that he's in if there is a check
+if check mate then the game is over
+the purpose of doing it this way is to prevent repetition of searching around the king as much as possible
+write it out and it may be possible to segregate into smaller methods later
+also need to update the game loop to accomodate this new way of doing things
+specifically, how are you going to check for moving into check?
 
 

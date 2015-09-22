@@ -110,8 +110,21 @@ class Board
 		return NUM_2_LET[(LET_2_NUM[column]-1)]
 	end
 
-	def locate_king(team)
+	def locate_piece(piece, board = @board)
+		identifier = piece.object_id
 		@board.each_pair do |space, piece|
+			if !piece.nil?
+				if piece.object_id == identifier
+					return space
+				end
+			end
+		end
+		puts "Error, cannot find piece #{piece}"
+		return nil
+	end
+
+	def locate_king(team, board = @board)
+		board.board.each_pair do |space, piece|
 			if !piece.nil?
 				if (piece.type == :king) && (piece.team == team)
 					return space
