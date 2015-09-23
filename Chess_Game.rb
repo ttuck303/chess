@@ -12,7 +12,7 @@ class Chess_Game
 
 	def initialize
 		@debug = false # switches debugging print lines on or off
-		@active_player = :black
+		@active_player = :white
 		@game_board = Board.new
 		#populate_new_board #commented out for debugging
 		@purgatory = clear_purgatory_hash
@@ -680,104 +680,104 @@ g = Chess_Game.new
 
 puts "checkmate test 1"
 test_board_1 = Board.new
-test_board_1.populate_space(:e8, King.new('black'))
-test_board_1.populate_space(:a7, Rook.new('white'))
-test_board_1.populate_space(:a8, Rook.new('white'))
+test_board_1.populate_space(:e8, King.new('white'))
+test_board_1.populate_space(:a7, Rook.new('black'))
+test_board_1.populate_space(:a8, Rook.new('black'))
 g.game_board = test_board_1
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
 
 puts "checkmate test 2"
 test_board_2 = Board.new
-test_board_2.populate_space(:d8, King.new('black'))
-test_board_2.populate_space(:a7, Rook.new('white'))
-test_board_2.populate_space(:a8, Rook.new('white'))
-test_board_2.populate_space(:d5, Bishop.new('black'))
+test_board_2.populate_space(:d8, King.new('white'))
+test_board_2.populate_space(:a7, Rook.new('black'))
+test_board_2.populate_space(:a8, Rook.new('black'))
+test_board_2.populate_space(:d5, Bishop.new('white'))
 g.game_board = test_board_2
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
 
 puts "checkmate test 3"
 test_board_3 = Board.new
-test_board_3.populate_space(:d8, King.new('black'))
-test_board_3.populate_space(:a7, Rook.new('white'))
-test_board_3.populate_space(:a8, Rook.new('white'))
-test_board_3.populate_space(:d5, Bishop.new('black'))
-test_board_3.populate_space(:d1, Queen.new('white'))
+test_board_3.populate_space(:d8, King.new('white'))
+test_board_3.populate_space(:a7, Rook.new('black'))
+test_board_3.populate_space(:a8, Rook.new('black'))
+test_board_3.populate_space(:d5, Bishop.new('white'))
+test_board_3.populate_space(:d1, Queen.new('black'))
 g.game_board = test_board_3
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
 
 puts "checkmate test 4"
 test_board_4 = Board.new
-test_board_4.populate_space(:b8, King.new('black'))
-test_board_4.populate_space(:a7, Pawn.new('black'))
-test_board_4.populate_space(:b7, Pawn.new('black'))
-test_board_4.populate_space(:c7, Pawn.new('black'))
-test_board_4.populate_space(:h8, Rook.new('white'))
+test_board_4.populate_space(:b1, King.new('white'))
+test_board_4.populate_space(:a2, Pawn.new('white'))
+test_board_4.populate_space(:b2, Pawn.new('white'))
+test_board_4.populate_space(:c2, Pawn.new('white'))
+test_board_4.populate_space(:h1, Rook.new('black'))
 g.game_board = test_board_4
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
 puts "checkmate test 5"
 test_board_4 = Board.new
-test_board_4.populate_space(:e8, King.new('black'))
-test_board_4.populate_space(:e7, Queen.new('white'))
-test_board_4.populate_space(:f5, Knight.new('white'))
+test_board_4.populate_space(:e8, King.new('white'))
+test_board_4.populate_space(:e7, Queen.new('black'))
+test_board_4.populate_space(:f5, Knight.new('black'))
 g.game_board = test_board_4
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
 puts "checkmate test 6"
 test_board_4 = Board.new
-test_board_4.populate_space(:g8, King.new('black'))
-test_board_4.populate_space(:h6, Knight.new('white'))
-test_board_4.populate_space(:h7, Pawn.new('black'))
-test_board_4.populate_space(:g6, Pawn.new('black'))
-test_board_4.populate_space(:f7, Pawn.new('black'))
-test_board_4.populate_space(:f8, Rook.new('black'))
-test_board_4.populate_space(:f6, Bishop.new('white'))
+test_board_4.populate_space(:g8, King.new('white'))
+test_board_4.populate_space(:h6, Knight.new('black'))
+test_board_4.populate_space(:h7, Pawn.new('white'))
+test_board_4.populate_space(:g6, Pawn.new('white'))
+test_board_4.populate_space(:f7, Pawn.new('white'))
+test_board_4.populate_space(:f8, Rook.new('white'))
+test_board_4.populate_space(:f6, Bishop.new('black'))
 g.game_board = test_board_4
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
 puts "checkmate test 7"
 test_board_4 = Board.new
-test_board_4.populate_space(:d8, King.new('black'))
-test_board_4.populate_space(:d7, Pawn.new('white'))
-test_board_4.populate_space(:c7, Pawn.new('white'))
-test_board_4.populate_space(:d6, King.new('white'))
+test_board_4.populate_space(:d1, King.new('white'))
+test_board_4.populate_space(:d2, Pawn.new('black'))
+test_board_4.populate_space(:c2, Pawn.new('black'))
+test_board_4.populate_space(:d3, King.new('black'))
 g.game_board = test_board_4
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
 puts "checkmate test 8"
 test_board_4 = Board.new
-test_board_4.populate_space(:e7, Knight.new('white'))
-test_board_4.populate_space(:f7, Pawn.new('black'))
-test_board_4.populate_space(:g7, Pawn.new('black'))
-test_board_4.populate_space(:h7, King.new('black'))
-test_board_4.populate_space(:h3, Rook.new('white'))
+test_board_4.populate_space(:e7, Knight.new('black'))
+test_board_4.populate_space(:f7, Pawn.new('white'))
+test_board_4.populate_space(:g7, Pawn.new('white'))
+test_board_4.populate_space(:h7, King.new('white'))
+test_board_4.populate_space(:h3, Rook.new('black'))
 g.game_board = test_board_4
 g.game_board.display_board
-puts g.update_game_status(:black)
+puts g.update_game_status(:white)
 puts 
 puts 
 puts 
