@@ -756,7 +756,31 @@ puts g.update_game_status(:black)
 puts 
 puts 
 puts 
-
+puts "checkmate test 7"
+test_board_4 = Board.new
+test_board_4.populate_space(:d8, King.new('black'))
+test_board_4.populate_space(:d7, Pawn.new('white'))
+test_board_4.populate_space(:c7, Pawn.new('white'))
+test_board_4.populate_space(:d6, King.new('white'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.update_game_status(:black)
+puts 
+puts 
+puts 
+puts "checkmate test 8"
+test_board_4 = Board.new
+test_board_4.populate_space(:e7, Knight.new('white'))
+test_board_4.populate_space(:f7, Pawn.new('black'))
+test_board_4.populate_space(:g7, Pawn.new('black'))
+test_board_4.populate_space(:h7, King.new('black'))
+test_board_4.populate_space(:h3, Rook.new('white'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.update_game_status(:black)
+puts 
+puts 
+puts 
 
 
 
