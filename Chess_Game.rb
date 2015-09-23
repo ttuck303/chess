@@ -199,7 +199,7 @@ class Chess_Game
 			puts "#{@active_player} you are in check!" if @game_status == :in_check
 			propose_move
 			until !in_check?(@active_player)
-				puts "You are still in check. Please enter a differrent move."
+				puts "That move puts you in check. Please enter a differrent move."
 				restore_prev_board_state
 				@game_board.display_board
 				propose_move
@@ -218,14 +218,19 @@ class Chess_Game
 	end
 
 	def restore_prev_board_state # undo the move by putting pieces back where they were on the board and clearing purgatory
+		puts "entering restory previous board state method" if @debug
+		puts "purgatory = #{@purgatory.inspect}" if @debug
 		origin = @purgatory[:attacking_piece_origin]
 		move = @purgatory[:attacking_piece_move]
 		attacking_piece = @purgatory[:attacking_piece]
 		taken_piece = @purgatory[:taken_piece]
-
+		puts "game board before restoration =" if @debug
+		@game_board.display_board if @debug
 		@game_board.empty_space(move)
 		@game_board.populate_space(origin, attacking_piece)
 		@game_board.populate_space(move, taken_piece)
+		puts "game board after restoration" if @debug
+		@game_board.display_board if @debug
 	end
 
 	def move_piece_phase_1(origin, move, piece) # moving pieces and stashing move info in hash
@@ -409,15 +414,20 @@ class Chess_Game
 	def in_check?(kings_team)
 		kings_location = locate_king(kings_team)
 		puts "within in check method, looking for team #{kings_team}" if @debug
-		puts "within in_check method, found king? #{kings_location}" if @debug
+		puts "within in_check method, found king at #{kings_location}" if @debug
 		surrounding_space_information = surrounding_spaces_and_pieces(kings_location, kings_team)
 		enemies = surrounding_space_information[:enemies]
 		vacancies = surrounding_space_information[:vacancies]
+		puts "Enemies found: #{enemies.inspect}" if @debug
+		puts "Vacancies found: #{vacancies.inspect}" if @debug
 
-
+		puts "checking proximity_threat" if @debug
 		return true if !enemies.empty? && proximity_threat_check(enemies)[0]
+		puts "checking lurking knights"  if @debug
 		return true if lurking_knight_check(kings_location, kings_team)[0]
+		puts " checking threats from gaps"  if @debug
 		return true if !vacancies.empty? && threat_from_gaps(kings_location, vacancies, kings_team)[0]
+		puts "found no threats to #{kings_team}"  if @debug
 		return false
 	end
 
@@ -500,10 +510,14 @@ class Chess_Game
 	end
 
 	def threat_from_gaps(kings_location, gaps_packet, kings_team)
+		puts "Entering Threats from Gaps method" if @debug
 		enemy_team = other_team(kings_team)
+		puts "evaluating threats from team #{enemy_team}" if @debug
 		gaps_packet.each do |packet|
+
 			gap_space = packet[0]
 			direction = packet[1].to_s
+			puts "inspecting packet with #{gap_space} and #{direction}" if @debug
 			until space_occupied?(gap_space) || gap_space == "Out of bounds" #fatal bug: checking for border is not sufficient because you can travel along border
 				gap_space = rel_space(gap_space, direction)
 			end
@@ -511,7 +525,9 @@ class Chess_Game
 			if space_occupied?(gap_space)
 				piece = get_piece_in_space(gap_space)
 				if piece.team == enemy_team
-					return [true, piece, gap_space] if ranged_enemy_threat?(piece, direction)
+					puts "located enemy piece #{piece} in #{gap_space}" if @debug
+					puts "evaluating ranged threat with ranged_enemy_threat method" if @debug
+					return [true, piece, gap_space] if ranged_enemy_threat?(piece, direction)[0]
 				end
 			end
 		end
@@ -519,6 +535,7 @@ class Chess_Game
 	end
 
 	def ranged_enemy_threat?(piece, direction)
+		puts "evaluating ranged enemy threat of #{piece} in #{direction}" if @debug
 		if ['n', 's', 'e', 'w'].include?(direction) && [:queen, :rook].include?(piece.type)
 			return [true, piece, direction]
 		elsif ['ne', 'nw', 'se', 'sw'].include?(direction) && [:bishop, :queen].include?(piece.type)
@@ -621,9 +638,11 @@ class Chess_Game
 			puts "move #{move.inspect}" if @debug
 			move_piece_phase_1(kings_location, move[0], king)
 			if !in_check?(kings_team)
+				puts "found safe place for king to move: #{move[0]}, therefore not check mate" if @debug
 				flag = true
 				break
 			end
+			puts "restoring previous board state" if @debug
 			restore_prev_board_state
 		end
 		return flag

@@ -424,5 +424,7 @@ specifically, how are you going to check for moving into check?
 
 Running debug methods, found that the game thinks pawns can move horizontally! 
 
+may be a bug wherein I am using the same stashed variables for the actual move, as well as the hypothetical moves being evaluated
+
 
 
