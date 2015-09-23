@@ -11,7 +11,8 @@ class Chess_Game
 	DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
 
 	def initialize
-		@active_player = :white
+		@debug = false # switches debugging print lines on or off
+		@active_player = :black
 		@game_board = Board.new
 		#populate_new_board #commented out for debugging
 		@purgatory = clear_purgatory_hash
@@ -206,8 +207,8 @@ class Chess_Game
 	end
 
 	def propose_move
-		puts
-		puts "proposing move..."
+		puts if @debug
+		puts "proposing move..." if @debug
 		move_info = get_player_move
 		move_piece_phase_1(move_info[0], move_info[1], move_info[2])
 	end
@@ -229,8 +230,8 @@ class Chess_Game
 		@game_board.empty_space(move)
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
-		puts "temporary game board being evaluated:"
-		@game_board.display_board
+		puts "temporary game board being evaluated:" if @debug
+		@game_board.display_board if @debug
 	end
 
 
@@ -419,10 +420,10 @@ class Chess_Game
 	def update_game_status(kings_team = @active_player)
 		populate_team_tracker
 		@game_status = :no_restrictions # for debugging
-		puts "game status = #{@game_status}"
+		puts "game status = #{@game_status}" if @debug
 
-		puts "remaining white team = #{get_teams_remaining_pieces(:white).inspect} aka #{@white_pieces.inspect}"
-		puts "remaining black team = #{get_teams_remaining_pieces(:black).inspect} aka #{@black_pieces.inspect}"
+		puts "remaining white team = #{get_teams_remaining_pieces(:white).inspect} aka #{@white_pieces.inspect}" if @debug
+		puts "remaining black team = #{get_teams_remaining_pieces(:black).inspect} aka #{@black_pieces.inspect}" if @debug
 		kings_location = locate_king(kings_team)
 		threatening_piece = nil
 		threat_space = nil
@@ -432,31 +433,31 @@ class Chess_Game
 		knights_nearby = lurking_knight_check(kings_location, kings_team)
 
 		if !enemies.empty?
-			puts "enemies not empty"
+			puts "enemies not empty"  if @debug
 			temp = proximity_threat_check(enemies)
 			is_proximity_threat = temp[0]
-			puts "proximity threat determined to be #{is_proximity_threat}"
+			puts "proximity threat determined to be #{is_proximity_threat}"  if @debug
 			if is_proximity_threat
 				threatening_piece = temp[1]
 				threat_space = temp[2]
 				@game_status = :in_check
 			end
 		end
-		puts "evaluating vacanices"
+		puts "evaluating vacanices"  if @debug
 		if !vacancies.empty?
-			puts "vacancies not empty, evaluating threat from gaps"
+			puts "vacancies not empty, evaluating threat from gaps"  if @debug
 			temp = threat_from_gaps(kings_location, vacancies, kings_team)
 			gap_threat = temp[0]
-			puts "gap threat determined to be #{gap_threat}"
+			puts "gap threat determined to be #{gap_threat}"  if @debug
 			if gap_threat
 				threatening_piece = temp[1]
 				threat_space = temp[2]
 				@game_status = :in_check
 			end
 		end
-		puts "evaluating knights nearby..."
+		puts "evaluating knights nearby..."  if @debug
 		if knights_nearby[0]
-			puts "determined kings nearby"
+			puts "determined kings nearby"  if @debug
 			@game_status = :in_check
 			threatening_piece = knights_nearby[1]
 			threat_space = knights_nearby[2]
@@ -538,7 +539,7 @@ class Chess_Game
 			direction = enemy_packet[1]
 			piece = enemy_packet[2]
 			if proximity_threat?(piece, direction)
-				puts "#{piece.type} in space #{space} is causing threat"
+				puts "#{piece.type} in space #{space} is causing threat" if @debug
 				return [true, piece, space]
 			end
 		end
@@ -650,16 +651,16 @@ class Chess_Game
 	end
 					
 	def can_eliminate_threat?(threat_location, kings_team)
-		puts "entering can_eliminate_threat method"
-		puts "inputs: #{threat_location}, #{kings_team}"
+		puts "entering can_eliminate_threat method"  if @debug
+		puts "inputs: #{threat_location}, #{kings_team}"  if @debug
 		flag = false
 		active_team = get_teams_remaining_pieces(kings_team)
-		puts "active team = #{active_team}"
+		puts "active team = #{active_team}"  if @debug
 		active_team.each do |piece|
-			puts "evaluating move potential for piece #{piece.inspect}"	
+			puts "evaluating move potential for piece #{piece.inspect}"	  if @debug
 			origin = locate_piece(piece)
 			if legal_move?(origin, threat_location, piece)
-				move_piece_phase_1(origin, move, piece)
+				move_piece_phase_1(origin, threat_location, piece)
 				flag = true if !in_check?(kings_team)
 				restore_prev_board_state
 			end
