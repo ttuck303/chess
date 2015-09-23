@@ -134,6 +134,7 @@ class Chess_Game
 	end
 
 	def legal_move?(origin, move, piece)
+		puts "Entering legal_move? for piece #{piece.type} #{piece.object_id} in space #{origin} to space #{move}" if @debug
 
 		if !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
@@ -154,8 +155,10 @@ class Chess_Game
 	end
 
 	def allowed_piece_movement?(origin, move, piece)
+		puts "entering allowed_piece_movement? method with inputs piece = #{piece.type} #{piece.object_id} from #{origin} to #{move}" if @debug
 		x_diff = calculate_x_difference(origin, move)
 		y_diff = calculate_y_difference(origin, move)
+		puts "calculated x_diff = #{x_diff} and y_diff #{y_diff}" if @debug
 		piece.acceptable_move?(x_diff, y_diff)
 	end
 
@@ -675,10 +678,11 @@ end
 g = Chess_Game.new
 #g.game_loop
 
-puts "test 1"
+puts "checkmate test 1"
 test_board_1 = Board.new
 test_board_1.populate_space(:e8, King.new('black'))
-test_board_1.populate_space(:d7, Pawn.new('white'))
+test_board_1.populate_space(:a7, Rook.new('white'))
+test_board_1.populate_space(:a8, Rook.new('white'))
 g.game_board = test_board_1
 g.game_board.display_board
 puts g.update_game_status(:black)
@@ -686,79 +690,73 @@ puts
 puts 
 puts 
 
-
-# test 1 pawn confirmed
-puts "test 2"
+puts "checkmate test 2"
 test_board_2 = Board.new
-test_board_2.populate_space(:e8, King.new('black'))
-test_board_2.populate_space(:f7, Pawn.new('white'))
+test_board_2.populate_space(:d8, King.new('black'))
+test_board_2.populate_space(:a7, Rook.new('white'))
+test_board_2.populate_space(:a8, Rook.new('white'))
+test_board_2.populate_space(:d5, Bishop.new('black'))
 g.game_board = test_board_2
 g.game_board.display_board
 puts g.update_game_status(:black)
 puts 
 puts 
 puts 
-# test 2 pawn confirmed
 
-puts "TEST 3"
+puts "checkmate test 3"
 test_board_3 = Board.new
-test_board_3.populate_space(:e8, King.new('black'))
-test_board_3.populate_space(:e7, Pawn.new('white'))
+test_board_3.populate_space(:d8, King.new('black'))
+test_board_3.populate_space(:a7, Rook.new('white'))
+test_board_3.populate_space(:a8, Rook.new('white'))
+test_board_3.populate_space(:d5, Bishop.new('black'))
+test_board_3.populate_space(:d1, Queen.new('white'))
 g.game_board = test_board_3
 g.game_board.display_board
 puts g.update_game_status(:black)
-#test 3 confirmed
 puts 
 puts 
 puts 
 
-puts "test 4"
+puts "checkmate test 4"
 test_board_4 = Board.new
-test_board_4.populate_space(:e8, King.new('black'))
-test_board_4.populate_space(:e7, Bishop.new('white'))
+test_board_4.populate_space(:b8, King.new('black'))
+test_board_4.populate_space(:a7, Pawn.new('black'))
+test_board_4.populate_space(:b7, Pawn.new('black'))
+test_board_4.populate_space(:c7, Pawn.new('black'))
+test_board_4.populate_space(:h8, Rook.new('white'))
 g.game_board = test_board_4
 g.game_board.display_board
 puts g.update_game_status(:black)
-
 puts 
 puts 
 puts 
-
-puts "test 5"
-
-test_board_5 = Board.new
-test_board_5.populate_space(:e8, King.new('black'))
-test_board_5.populate_space(:e7, Queen.new('white'))
-g.game_board = test_board_5
+puts "checkmate test 5"
+test_board_4 = Board.new
+test_board_4.populate_space(:e8, King.new('black'))
+test_board_4.populate_space(:e7, Queen.new('white'))
+test_board_4.populate_space(:f5, Knight.new('white'))
+g.game_board = test_board_4
 g.game_board.display_board
 puts g.update_game_status(:black)
-
-
 puts 
 puts 
 puts 
-
-puts "test 6"
-
-test_board_6 = Board.new
-test_board_6.populate_space(:e8, King.new('black'))
-test_board_6.populate_space(:e7, Rook.new('white'))
-g.game_board = test_board_6
+puts "checkmate test 6"
+test_board_4 = Board.new
+test_board_4.populate_space(:g8, King.new('black'))
+test_board_4.populate_space(:h6, Knight.new('white'))
+test_board_4.populate_space(:h7, Pawn.new('black'))
+test_board_4.populate_space(:g6, Pawn.new('black'))
+test_board_4.populate_space(:f7, Pawn.new('black'))
+test_board_4.populate_space(:f8, Rook.new('black'))
+test_board_4.populate_space(:f6, Bishop.new('white'))
+g.game_board = test_board_4
 g.game_board.display_board
 puts g.update_game_status(:black)
-
 puts 
 puts 
 puts 
 
-puts "test 7"
-
-test_board_7 = Board.new
-test_board_7.populate_space(:e8, King.new('black'))
-test_board_7.populate_space(:d7, Rook.new('white'))
-g.game_board = test_board_7
-g.game_board.display_board
-puts g.update_game_status(:black)
 
 
 

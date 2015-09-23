@@ -419,4 +419,10 @@ write it out and it may be possible to segregate into smaller methods later
 also need to update the game loop to accomodate this new way of doing things
 specifically, how are you going to check for moving into check?
 
+--- 
+9/23/2014
+
+Running debug methods, found that the game thinks pawns can move horizontally! 
+
+
 

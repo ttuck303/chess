@@ -21,6 +21,9 @@ class Pawn < Piece
 		elsif x.abs > 1
 			puts "Illegal Move: Too much lateral movement."
 			return false
+		elsif x.abs == 1 && y.abs != 1
+			puts "Illegal Move: Cannot move horizontally."
+			return false
 		elsif (y.abs == 2) && @moved 	# if first move, allowed to go 2, otherwise just 1
 			puts "Illegal Move: Can only move 2 spaces on piece's first move."
 			return false
