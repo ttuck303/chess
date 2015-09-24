@@ -426,5 +426,101 @@ Running debug methods, found that the game thinks pawns can move horizontally!
 
 may be a bug wherein I am using the same stashed variables for the actual move, as well as the hypothetical moves being evaluated
 
+you rely on the same method in two places
+you don't want to repeat yourself with two identical methods with different names
+so can you alter the methods so that they modify different groups of data?
+what are they even modifying?
+
+here is what you have
+
+	propose_move
+		get_player_move - endless loop until a legal move is entered
+			select_a_piece - endless loop until you select a piece thats on your team
+			enter_desired_move gets user input 1x
+			legal_move? checks that the move is legal
+				checks a variety of moves, as well as special cases
+				special cases is NOT dry (we are checking movement patterns of pawn here, as well as in the piece class)
+
+			once a move that is legal (on an empty board) has been entered
+			the move is proposed with move_piece_phase_1, which stashes the original board state in a temporary array and then completes the move 
+
+I could put out bugs all day until this code works, but I think this is time for an intervention with a massive refactor. Luckily, I have all the pieces in place, so it shouldn't require too much rework. I will outline, rename, and clean up so that its super obvious what's going on. 
+
+
+
+How it should work:
+		initialize a new game
+			set a new board
+			set a team to go first
+			set a game_history array (new Class!)
+			populate the team arrays (decision needed: include the space? is this redundant wrt the board object?)
+
+		enter game loop (breaks when checkmate or stalemate)
+			move_piece_loop
+				select a piece
+				confirm that the piece is on the active team (loop continuously until it is)
+				enter a move
+				confirm that the move is legal (loop continuously until it is)
+					the piece is on the board
+					piece is allowed to move in such a way
+						check first-time move priviledges
+					there are no obstructions (its not illegally hopping)
+					the destination space is not occupied by a teammate
+				stash the move in purgatory and make the move on the board
+				is the active team now in check?
+					yes -> undo the move, 
+						use purgatory to move the pieces back to their pre-move states
+						clear the stash
+						re enter the move loop
+					no -> finalize the move
+						update piece info
+							destroy pieces that are taken
+							mark moved pieces as moved
+							update team tracking arrays
+						empty the move stash
+
+
+			update game state
+				check if enemy is now in check (this method must be independent of existing purgatory)
+					yes ->
+						check if enemy is in check mate
+							yes ->
+								end game
+							no -> 
+								alert team that he is in check and must move out of check
+					no ->
+						set game state to normal and continue
+				check for stalemate
+					yes ->
+						end game, declaring a stalemate
+
+			switch teams and continue game loop
+					
+
+
+		requires updating the check mate checks
+		actually, if move_loop works, purgatory should be clear by the time it inspects for checkmate,
+		therefore the only updates required are to replace methods that I deleted 
+		at taht point, I will be able to check everything
+
+		to replace move_phase_1 (what a crappy method name) the following submethods are needed:
+			- stash the board state
+			- move the piece to the open spot
+			- (since its the king, and the list of vacant spots is pre sorted, you don't need to check move legality UNLESS THIS CHANGES WHEN YOU ADD ABILITY TO CASTLE)
+			- check if in check
+				yes -> 
+					restore board state
+					continue
+				no ->
+					restore board state
+					return true (that you CAN move king)
+
+
+	what happens when the active team is in check and they select the wrong piece to move out of check?
+		if at any point if the move is illegal for any reason, just re enter the move loop?
+		that means compartmentalizing the move loop, but thats pok
+			
+
+
 
 

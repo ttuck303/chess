@@ -11,15 +11,15 @@ class Chess_Game
 	DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
 
 	def initialize
-		@debug = true # switches debugging print lines on or off
+		@debug = false # switches debugging print lines on or off
 		@active_player = :white
 		@game_board = Board.new
 		populate_new_board #commented out for debugging
-		@purgatory = clear_purgatory_hash
-		@white_pieces = []
-		@black_pieces = []
-
-		@game_status = :no_restrictions
+		@purgatory = {}
+		clear_purgatory
+		@white_pieces, @black_pieces = [], []
+		populate_team_tracker
+		@game_status = :normal
 	end
 
 	def populate_new_board #TO DO: refactor to be more concise
@@ -69,8 +69,8 @@ class Chess_Game
 		@game_board.populate_space(space, piece)
 	end
 
-	def clear_purgatory_hash
-		{:taken_piece => nil, :attacking_piece_move => nil, :attacking_piece => nil, :attacking_piece_origin => nil}
+	def clear_purgatory
+		@purgatory = {:taken_piece => nil, :attacking_piece_move => nil, :attacking_piece => nil, :attacking_piece_origin => nil}
 	end
 
 	def stash_in_purgatory(origin, move, piece)
@@ -89,43 +89,24 @@ class Chess_Game
 	end
 
 
-	def get_player_move
-		temp = select_a_piece
-		piece = temp[0]
-		origin = temp[1]
-		move = enter_desired_move
-		until legal_move?(origin, move, piece)
-			move = enter_desired_move
-			return get_player_move if move.to_s.downcase == 'o'
-		end
-		[origin, move, piece] # return a piece and the legal move
+	def select_a_piece_space
+		puts "#{@active_player.capitalize} select a piece to move ('a1' thru 'h8')"
+		choice = gets.strip.to_sym
 	end
 
-	def select_a_piece
-		puts "#{@active_player} select a piece to move ('a1' thru 'h8')"
-		choice = gets.strip.to_sym
-		piece = nil
-	
+	def valid_piece_selection?(choice)
 		if !on_board?(choice) 					# check that the space entry is legit
 			puts "Selection #{choice} is not on game board. Please try again."
-			return select_a_piece
+			return false
 		elsif !space_occupied?(choice) 						# check that the space is occupied
 			puts "There is no piece in the space. Please try again."
-			return select_a_piece
+			return false
 		elsif !selection_is_on_active_team?(choice) 		# check that the piece belongs to the active player's team
 			puts "That's not your team!"
-			return select_a_piece
+			return false
 		else
-			piece = get_piece_in_space(choice)
-			puts "You have selected #{piece.type} in space #{choice.to_s}."
+			return true
 		end
-		return [piece, choice]
-	end
-
-	def confirm_piece_selection
-		puts "Is this is correct? [y/n]"
-		confirmation = gets.strip.downcase
-		get_player_move unless confirmation == 'y'
 	end
 
 	def enter_desired_move
@@ -133,8 +114,8 @@ class Chess_Game
 		choice = gets.strip.to_sym
 	end
 
-	def legal_move?(origin, move, piece)
-		puts "Entering legal_move? for piece #{piece.type} #{piece.object_id} in space #{origin} to space #{move}" if @debug
+	def valid_move_selection?(origin, move, piece)
+		puts "Entering valid_move_selection? for piece #{piece.type} #{piece.object_id} in space #{origin} to space #{move}" if @debug
 
 		if !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
@@ -144,7 +125,7 @@ class Chess_Game
 			return false
 		elsif !allowed_piece_movement?(origin, move, piece)  # check that the move abides by the piece's move rules (on an open board)
 			return false
-		elsif hopping_violation?(spaces_between(origin, move), piece) #hopping violation doesn't apply to knights.
+		elsif hopping_violation?(spaces_between(origin, move)[1..-2], piece) #hopping violation doesn't apply to knights.
 			puts "Your #{piece.type} cannot jump other pieces. Please try again."
 			return false
 		elsif violates_special_cases?(origin, move, piece)
@@ -165,7 +146,6 @@ class Chess_Game
 	def get_piece_in_space(space) # gets the piece or returns nil if there is none
 		@game_board.get_piece_in_space(space)
 	end
-
 
 	def on_board?(selection)
 		@game_board.on_board?(selection)
@@ -191,31 +171,46 @@ class Chess_Game
 		return piece.team == team
 	end
 
-	def game_loop
+	def display_board
+		@game_board.display_board
+	end
 
-		until @game_status == :checkmate
+	def move_piece_loop
+		display_board
+		piece_origin = select_a_piece_space
+		if !valid_piece_selection?(piece_origin)
+			piece_origin = select_a_piece_space until valid_piece_selection?(piece_origin)
+		end
+		piece_to_move = get_piece_in_space(piece_origin)
+		piece_destination = enter_desired_move
+		move_piece_loop if piece_destination == 'o' #escape the current piece selection
+		if !valid_move_selection?(piece_origin, piece_destination, piece_to_move)
+			piece_destination = enter_desired_move until valid_move_selection?(piece_origin, piece_destination, piece_to_move)
+		end
 
-			@game_board.display_board
-			puts "#{@active_player} you are in check!" if @game_status == :in_check
-			propose_move
-			until !in_check?(@active_player)
-				puts "That move puts you in check. Please enter a differrent move."
-				restore_prev_board_state
-				@game_board.display_board
-				propose_move
-			end
-			complete_proposed_move
-			switch_team
-			update_game_status
+		stash_in_purgatory(piece_origin, piece_destination, piece_to_move)
+		make_simple_move(piece_origin, piece_destination, piece_to_move)
+
+		if in_check?(@active_player)
+			restore_prev_board_state
+			move_piece_loop
+		else
+			finalize_move
 		end
 	end
 
-	def propose_move
-		puts if @debug
-		puts "proposing move..." if @debug
-		move_info = get_player_move
-		move_piece_phase_1(move_info[0], move_info[1], move_info[2])
+	def game_loop
+		until game_over?
+			move_piece_loop
+			update_game_status(other_team(@active_player))
+			switch_team
+		end
 	end
+
+	def game_over?
+		@game_status == :checkmate || @game_status == :stalemate
+	end
+
 
 	def restore_prev_board_state # undo the move by putting pieces back where they were on the board and clearing purgatory
 		puts "entering restory previous board state method" if @debug
@@ -225,22 +220,13 @@ class Chess_Game
 		attacking_piece = @purgatory[:attacking_piece]
 		taken_piece = @purgatory[:taken_piece]
 		puts "game board before restoration =" if @debug
-		@game_board.display_board if @debug
+		display_board if @debug
 		@game_board.empty_space(move)
 		@game_board.populate_space(origin, attacking_piece)
 		@game_board.populate_space(move, taken_piece)
 		puts "game board after restoration" if @debug
-		@game_board.display_board if @debug
-	end
-
-	def move_piece_phase_1(origin, move, piece) # moving pieces and stashing move info in hash
-		#puts "Moving phase 1"
-		stash_in_purgatory(origin, move, piece)
-		@game_board.empty_space(move)
-		@game_board.populate_space(move, piece)
-		@game_board.empty_space(origin)
-		puts "temporary game board being evaluated:" if @debug
-		@game_board.display_board if @debug
+		display_board if @debug
+		clear_purgatory
 	end
 
 
@@ -249,15 +235,14 @@ class Chess_Game
 	end
 
 
-	def complete_proposed_move # finalizing the move by clearing the purgatory
+	def finalize_move # finalizing the move by clearing the purgatory
 		piece = @purgatory[:taken_piece]
 		if !piece.nil?
 			piece.taken
 			eliminate_piece_from_match(piece)
 		end
-
 		@purgatory[:attacking_piece].moved!
-		@purgatory = clear_purgatory_hash
+		clear_purgatory
 	end
 
 	def eliminate_piece_from_match(piece)
@@ -312,7 +297,7 @@ class Chess_Game
 		NUM_2_LET[number]
 	end
 
-	def spaces_between(origin, move) 
+	def spaces_between(origin, move) # need to make sure that this outputs in order of origin -> move
 		o_column = origin.to_s[0] 
 		o_row = origin.to_s[1].to_i
 		m_column = move.to_s[0]
@@ -323,9 +308,10 @@ class Chess_Game
 			output = create_spaces_list(o_column, m_column, o_row, m_row)
 		else
 			output = create_spaces_list(m_column, o_column, m_row, o_row)
+			output.reverse!
 		end
 
-		return output[1..-2] 
+		return output
 	end
 
 	def create_spaces_list(smaller_letter, larger_letter, number_1, number_2)
@@ -411,7 +397,7 @@ class Chess_Game
 		return @game_board.locate_piece(piece)
 	end
 
-	def in_check?(kings_team)
+	def in_check?(kings_team = @active_player)
 		kings_location = locate_king(kings_team)
 		puts "within in check method, looking for team #{kings_team}" if @debug
 		puts "within in_check method, found king at #{kings_location}" if @debug
@@ -432,10 +418,7 @@ class Chess_Game
 	end
 
 	def update_game_status(kings_team = @active_player)
-		populate_team_tracker
-		#@game_status = :no_restrictions # for debugging
 		puts "game status = #{@game_status}" if @debug
-
 		puts "remaining white team = #{get_teams_remaining_pieces(:white).inspect} aka #{@white_pieces.inspect}" if @debug
 		puts "remaining black team = #{get_teams_remaining_pieces(:black).inspect} aka #{@black_pieces.inspect}" if @debug
 		kings_location = locate_king(kings_team)
@@ -479,7 +462,7 @@ class Chess_Game
 		
 		puts "entering checkmate check" if @debug
 		if @game_status == :in_check
-			if !(can_move_king?(kings_location, vacancies, kings_team) || can_obstruct_threat?(kings_location, threat_space, kings_team) || can_eliminate_threat?(threat_space, kings_team))
+			if !(can_move_king?(kings_team, kings_location, vacancies) || can_obstruct_or_destroy_threat?(kings_team, kings_location, threat_space) )
 				puts "found check m8 to be true" if @debug
 				@game_status = :checkmate
 			end
@@ -630,19 +613,19 @@ class Chess_Game
 		@game_board.is_border?(space)
 	end
 
-	def can_move_king?(kings_location, adjacent_vacancies, kings_team)
+	def can_move_king?(kings_team, kings_location, adjacent_vacancies)
 		king = get_piece_in_space(kings_location)
 		puts "king var = #{king.inspect}, location = #{kings_location}" if @debug
 		flag = false
-		adjacent_vacancies.each do |move|
+		adjacent_vacancies.each do |move| # packect format is [space, direction]
 			puts "move #{move.inspect}" if @debug
-			move_piece_phase_1(kings_location, move[0], king)
+			stash_in_purgatory(kings_location, move[0], king)
+			make_simple_move(kings_location, move[0], king)
 			if !in_check?(kings_team)
-				puts "found safe place for king to move: #{move[0]}, therefore not check mate" if @debug
-				flag = true
-				break
+				flag = true 
+				restore_prev_board_state
+				return flag
 			end
-			puts "restoring previous board state" if @debug
 			restore_prev_board_state
 		end
 		return flag
@@ -659,15 +642,20 @@ class Chess_Game
 		end
 	end
 
-	def can_obstruct_threat?(kings_location, threat_location, kings_team)
-		threat_path = spaces_between(kings_location, threat_location) 	# get the path between the threat and the king
+	def can_obstruct_or_destroy_threat?(kings_team, kings_location, threat_location)
+		threat_path = spaces_between(kings_location, threat_location)[1..-1] 	# get the path between the threat and the king
 		flag = false
-		threat_path.each do |move|
-			get_teams_remaining_pieces(kings_team).each do |piece|
-				origin = locate_piece(piece)
-				if legal_move?(origin, move, piece)
-					move_piece_phase_1(origin, move, piece)
-					flag = true if !in_check?(kings_team)
+		get_teams_remaining_pieces(kings_team).each do |piece|
+			origin = locate_piece(piece)
+			threat_path.each do |move|
+				if valid_move_selection?(origin, move, piece)
+					stash_in_purgatory(origin, move, piece)
+					make_simple_move(kings_location, move, piece)
+					if !in_check?(kings_team)
+						flag = true
+						restore_prev_board_state
+						return flag
+					end
 					restore_prev_board_state
 				end
 			end
@@ -675,23 +663,6 @@ class Chess_Game
 		return flag
 	end
 					
-	def can_eliminate_threat?(threat_location, kings_team)
-		puts "entering can_eliminate_threat method"  if @debug
-		puts "inputs: #{threat_location}, #{kings_team}"  if @debug
-		flag = false
-		active_team = get_teams_remaining_pieces(kings_team)
-		puts "active team = #{active_team}"  if @debug
-		active_team.each do |piece|
-			puts "evaluating move potential for piece #{piece.inspect}"	  if @debug
-			origin = locate_piece(piece)
-			if legal_move?(origin, threat_location, piece)
-				move_piece_phase_1(origin, threat_location, piece)
-				flag = true if !in_check?(kings_team)
-				restore_prev_board_state
-			end
-		end
-		return flag
-	end
 
 
 end
