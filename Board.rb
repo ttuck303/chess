@@ -190,7 +190,6 @@ class Board
 		BORDERS.include?(space)
 	end
 
-
 end
 
 

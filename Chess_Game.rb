@@ -14,7 +14,7 @@ class Chess_Game
 		@debug = false # switches debugging print lines on or off
 		@active_player = :black
 		@game_board = Board.new
-		populate_new_board #commented out for debugging
+		#populate_new_board #commented out for debugging
 		@purgatory = {}
 		clear_purgatory
 		@white_pieces, @black_pieces = [], []
@@ -212,6 +212,7 @@ class Chess_Game
 	def game_loop
 		until game_over?
 			move_piece_loop
+			check_pawn_promotion
 			update_game_status(other_team(@active_player))
 			switch_team
 		end
@@ -262,6 +263,16 @@ class Chess_Game
 			@black_pieces.delete(piece)
 		else
 			puts "piece not found..."
+		end
+	end
+
+	def add_piece_to_tracker(piece)
+		if piece.team == :white 
+			@white_pieces << piece
+		elsif piece.team == :black 
+			@black_pieces << piece 
+		else
+			puts "Error identifying piece's team"
 		end
 	end
 
@@ -400,7 +411,7 @@ class Chess_Game
 	end
 
 	def locate_king(kings_team)
-		puts "locating king on team #{kings_team.inspect}"
+		puts "locating king on team #{kings_team.inspect}" if @debug
 		return @game_board.locate_king(kings_team.to_sym)
 	end
 
@@ -697,10 +708,56 @@ class Chess_Game
 		choice = gets.strip.to_i
 		unless (1..4).include?(choice)
 			puts "Please try again."
-			select_pawn_promotion
+			return select_pawn_promotion
 		end
 		return choice
 	end
+
+	def get_entire_row(row_number)
+		@game_board.get_entire_row(row_number)
+	end
+
+	def check_pawn_promotion
+		row_8 = [:a8, :b8, :c8, :d8, :e8, :f8, :g8, :h8]
+		row_1 = [:a1, :b1, :c1, :d1, :e1, :f1, :g1, :h1]
+		row_8.each do |space|
+			if space_occupied?(space) && get_piece_in_space(space).type == :pawn
+				promote_pawn(space, :white)
+			end
+		end
+		row_1.each do |space|
+			if space_occupied?(space) && get_piece_in_space(space).type == :pawn
+				promote_pawn(space, :black)
+			end
+		end
+	end
+
+	def promote_pawn(space, team)
+		piece_type = select_pawn_promotion
+		new_piece = nil
+		case piece_type
+		when 1
+			new_piece = Queen.new(team)
+		when 2
+			new_piece = Knight.new(team)
+		when 3
+			new_piece = Bishop.new(team)
+		when 4
+			new_piece = Rook.new(team)
+		end
+		eliminate_piece_from_match(get_piece_in_space(space))
+		populate_space(space, new_piece)
+		add_piece_to_tracker(new_piece)
+	end
+
+
+
+
+
+		# check 8th row for white pawns
+		# check 1st row for black pawns 
+
+
 					
 
 
@@ -708,123 +765,16 @@ end
 
 
 g = Chess_Game.new
-#g.game_loop
+test_board = Board.new
+test_board.populate_space(:a7, Pawn.new('white'))
+test_board.populate_space(:e8, King.new('black'))
+test_board.populate_space(:e1, King.new('white'))
+g.game_board = test_board
+g.game_loop
 
 
-#TEST CASES FOR CHECK MATE
 
-puts "checkmate test 1"
-test_board_1 = Board.new
-test_board_1.populate_space(:e8, King.new('white'))
-test_board_1.populate_space(:a7, Rook.new('black'))
-test_board_1.populate_space(:a8, Rook.new('black'))
-test_board_1.populate_space(:e1, King.new('black'))
 
-g.game_board = test_board_1
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
-
-puts "checkmate test 2"
-test_board_2 = Board.new
-test_board_2.populate_space(:d8, King.new('white'))
-test_board_2.populate_space(:a7, Rook.new('black'))
-test_board_2.populate_space(:a8, Rook.new('black'))
-test_board_2.populate_space(:d5, Bishop.new('white'))
-test_board_2.populate_space(:e1, King.new('black'))
-g.game_board = test_board_2
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
-
-puts "checkmate test 3"
-test_board_3 = Board.new
-test_board_3.populate_space(:d8, King.new('white'))
-test_board_3.populate_space(:a7, Rook.new('black'))
-test_board_3.populate_space(:a8, Rook.new('black'))
-test_board_3.populate_space(:d5, Bishop.new('white'))
-test_board_3.populate_space(:d1, Queen.new('black'))
-test_board_3.populate_space(:a1, King.new('black'))
-g.game_board = test_board_3
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
-
-puts "checkmate test 4"
-test_board_4 = Board.new
-test_board_4.populate_space(:b1, King.new('white'))
-test_board_4.populate_space(:a2, Pawn.new('white'))
-test_board_4.populate_space(:b2, Pawn.new('white'))
-test_board_4.populate_space(:c2, Pawn.new('white'))
-test_board_4.populate_space(:h1, Rook.new('black'))
-test_board_4.populate_space(:a1, King.new('black'))
-g.game_board = test_board_4
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
-puts "checkmate test 5"
-test_board_4 = Board.new
-test_board_4.populate_space(:e8, King.new('white'))
-test_board_4.populate_space(:e7, Queen.new('black'))
-test_board_4.populate_space(:f5, Knight.new('black'))
-test_board_4.populate_space(:a1, King.new('black'))
-g.game_board = test_board_4
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
-puts "checkmate test 6"
-test_board_4 = Board.new
-test_board_4.populate_space(:g8, King.new('white'))
-test_board_4.populate_space(:h6, Knight.new('black'))
-test_board_4.populate_space(:h7, Pawn.new('white'))
-test_board_4.populate_space(:g6, Pawn.new('white'))
-test_board_4.populate_space(:f7, Pawn.new('white'))
-test_board_4.populate_space(:f8, Rook.new('white'))
-test_board_4.populate_space(:f6, Bishop.new('black'))
-test_board_4.populate_space(:a1, King.new('black'))
-g.game_board = test_board_4
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
-puts "checkmate test 7"
-test_board_4 = Board.new
-test_board_4.populate_space(:d1, King.new('white'))
-test_board_4.populate_space(:d2, Pawn.new('black'))
-test_board_4.populate_space(:c2, Pawn.new('black'))
-test_board_4.populate_space(:d3, King.new('black'))
-test_board_4.populate_space(:a1, King.new('black'))
-g.game_board = test_board_4
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
-puts "checkmate test 8"
-test_board_4 = Board.new
-test_board_4.populate_space(:e7, Knight.new('black'))
-test_board_4.populate_space(:f7, Pawn.new('white'))
-test_board_4.populate_space(:g7, Pawn.new('white'))
-test_board_4.populate_space(:h7, King.new('white'))
-test_board_4.populate_space(:h3, Rook.new('black'))
-test_board_4.populate_space(:a1, King.new('black'))
-g.game_board = test_board_4
-g.game_board.display_board
-puts g.update_game_status(:white)
-puts 
-puts 
-puts 
 
 
 
