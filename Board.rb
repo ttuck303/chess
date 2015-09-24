@@ -122,8 +122,8 @@ class Board
 		return nil
 	end
 
-	def locate_king(team, board = @board)
-		board.board.each_pair do |space, piece|
+	def locate_king(team)
+		@board.each_pair do |space, piece|
 			if !piece.nil?
 				if (piece.type == :king) && (piece.team == team)
 					return space

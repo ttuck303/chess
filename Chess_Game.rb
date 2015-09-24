@@ -12,7 +12,7 @@ class Chess_Game
 
 	def initialize
 		@debug = false # switches debugging print lines on or off
-		@active_player = :white
+		@active_player = :black
 		@game_board = Board.new
 		populate_new_board #commented out for debugging
 		@purgatory = {}
@@ -84,6 +84,7 @@ class Chess_Game
 	end
 
 	def make_simple_move(origin, move, piece)
+		puts "making simple move #{piece} from #{origin} to #{move}" if @debug
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
 	end
@@ -120,7 +121,7 @@ class Chess_Game
 		if !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
 			return false
-		elsif space_occupied?(move) && selection_is_on_active_team?(move)   	# check that the desired space is not occupied by a teammate
+		elsif space_occupied?(move) && enemies?(piece, get_piece_in_space(move))   	# check that the desired space is not occupied by a teammate
 			puts "That space is occupied by your team. Please try again."
 			return false
 		elsif !allowed_piece_movement?(origin, move, piece)  # check that the move abides by the piece's move rules (on an open board)
@@ -133,6 +134,14 @@ class Chess_Game
 		else
 			return true
 		end
+	end
+
+	def enemies?(attacking_piece, defending_piece)
+		puts if @debug
+		puts "entering enemies? method" if @debug
+		puts "checking #{attacking_piece} with team #{attacking_piece.team}" if @debug
+		puts "against #{defending_piece} with team #{defending_piece.team} " if @debug
+		attacking_piece.team == defending_piece.team
 	end
 
 	def allowed_piece_movement?(origin, move, piece)
@@ -373,8 +382,8 @@ class Chess_Game
 		vacant_spaces = []
 
 		DIRECTIONS.each do |dir|
-			puts "inputs to relative_space method:" if @debug
-			puts "space = #{space}, direction = #{dir}" if @debug
+			#puts "inputs to relative_space method:" if @debug
+			#puts "space = #{space}, direction = #{dir}" if @debug
 			resulting_space = @game_board.relative_space(space, dir)
 			if resulting_space != "Out of bounds"
 				if space_occupied?(resulting_space)
@@ -390,8 +399,9 @@ class Chess_Game
 		return {:vacancies => vacant_spaces, :enemies => enemy_spaces}
 	end
 
-	def locate_king(kings_team, board = @game_board)
-		return @game_board.locate_king(kings_team, board)
+	def locate_king(kings_team)
+		puts "locating king on team #{kings_team.inspect}"
+		return @game_board.locate_king(kings_team.to_sym)
 	end
 
 	def locate_piece(piece)
@@ -419,9 +429,11 @@ class Chess_Game
 	end
 
 	def update_game_status(kings_team = @active_player)
+		@game_status = :normal # ONLY FOR DEBUGGING SO WE CAN EVALUATE MID GAME SCENARIOS
+		populate_team_tracker # ONLY FOR DEBUGGING SO WE CAN EVALUATE MID GAME SCENARIOS
 		puts "game status = #{@game_status}" if @debug
-		puts "remaining white team = #{get_teams_remaining_pieces(:white).inspect} aka #{@white_pieces.inspect}" if @debug
-		puts "remaining black team = #{get_teams_remaining_pieces(:black).inspect} aka #{@black_pieces.inspect}" if @debug
+		puts "remaining white team = #{@white_pieces.inspect}" if @debug
+		puts "remaining black team = #{@black_pieces.inspect}" if @debug
 		kings_location = locate_king(kings_team)
 		threatening_piece = nil
 		threat_space = nil
@@ -466,7 +478,7 @@ class Chess_Game
 		
 		puts "entering checkmate check" if @debug
 		if @game_status == :in_check
-			if !(can_move_king?(kings_team, kings_location, vacancies) || can_obstruct_or_destroy_threat?(kings_team, kings_location, threat_space) )
+			if !(can_move_king?(kings_team, kings_location, vacancies) || can_obstruct_or_destroy_threat?(kings_team, kings_location, threat_space))
 				puts "found check m8 to be true" if @debug
 				puts "#{@active_player.capitalize} puts #{kings_team} in checkmate!"
 				@game_status = :checkmate
@@ -523,7 +535,7 @@ class Chess_Game
 	end
 
 	def ranged_enemy_threat?(piece, direction)
-		puts "evaluating ranged enemy threat of #{piece} in #{direction}" if @debug
+		puts "evaluating ranged enemy threat of #{piece} in direction #{direction}" if @debug
 		if ['n', 's', 'e', 'w'].include?(direction) && [:queen, :rook].include?(piece.type)
 			return [true, piece, direction]
 		elsif ['ne', 'nw', 'se', 'sw'].include?(direction) && [:bishop, :queen].include?(piece.type)
@@ -648,15 +660,23 @@ class Chess_Game
 	end
 
 	def can_obstruct_or_destroy_threat?(kings_team, kings_location, threat_location)
+		puts "Entering can obstruct or destroy method" if @debug
+
 		threat_path = spaces_between(kings_location, threat_location)[1..-1] 	# get the path between the threat and the king
+		puts "Threat path = #{threat_path.inspect}" if @debug
 		flag = false
 		get_teams_remaining_pieces(kings_team).each do |piece|
+			puts "looking for piece #{piece}" if @debug
 			origin = locate_piece(piece)
+			puts "with origin at #{origin}" if @debug
 			threat_path.each do |move|
+				puts "inspecting move to  #{move}" if @debug
 				if valid_move_selection?(origin, move, piece)
+					puts "move determined to be valid" if @debug
 					stash_in_purgatory(origin, move, piece)
-					make_simple_move(kings_location, move, piece)
+					make_simple_move(origin, move, piece)
 					if !in_check?(kings_team)
+						puts "found way to obstruct or destroy threat!" if @debug
 						flag = true
 						restore_prev_board_state
 						return flag
@@ -674,8 +694,123 @@ end
 
 
 g = Chess_Game.new
-g.game_loop
+#g.game_loop
 
+
+#TEST CASES FOR CHECK MATE
+
+puts "checkmate test 1"
+test_board_1 = Board.new
+test_board_1.populate_space(:e8, King.new('white'))
+test_board_1.populate_space(:a7, Rook.new('black'))
+test_board_1.populate_space(:a8, Rook.new('black'))
+test_board_1.populate_space(:e1, King.new('black'))
+
+g.game_board = test_board_1
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
+
+puts "checkmate test 2"
+test_board_2 = Board.new
+test_board_2.populate_space(:d8, King.new('white'))
+test_board_2.populate_space(:a7, Rook.new('black'))
+test_board_2.populate_space(:a8, Rook.new('black'))
+test_board_2.populate_space(:d5, Bishop.new('white'))
+test_board_2.populate_space(:e1, King.new('black'))
+g.game_board = test_board_2
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
+
+puts "checkmate test 3"
+test_board_3 = Board.new
+test_board_3.populate_space(:d8, King.new('white'))
+test_board_3.populate_space(:a7, Rook.new('black'))
+test_board_3.populate_space(:a8, Rook.new('black'))
+test_board_3.populate_space(:d5, Bishop.new('white'))
+test_board_3.populate_space(:d1, Queen.new('black'))
+test_board_3.populate_space(:a1, King.new('black'))
+g.game_board = test_board_3
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
+
+puts "checkmate test 4"
+test_board_4 = Board.new
+test_board_4.populate_space(:b1, King.new('white'))
+test_board_4.populate_space(:a2, Pawn.new('white'))
+test_board_4.populate_space(:b2, Pawn.new('white'))
+test_board_4.populate_space(:c2, Pawn.new('white'))
+test_board_4.populate_space(:h1, Rook.new('black'))
+test_board_4.populate_space(:a1, King.new('black'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
+puts "checkmate test 5"
+test_board_4 = Board.new
+test_board_4.populate_space(:e8, King.new('white'))
+test_board_4.populate_space(:e7, Queen.new('black'))
+test_board_4.populate_space(:f5, Knight.new('black'))
+test_board_4.populate_space(:a1, King.new('black'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
+puts "checkmate test 6"
+test_board_4 = Board.new
+test_board_4.populate_space(:g8, King.new('white'))
+test_board_4.populate_space(:h6, Knight.new('black'))
+test_board_4.populate_space(:h7, Pawn.new('white'))
+test_board_4.populate_space(:g6, Pawn.new('white'))
+test_board_4.populate_space(:f7, Pawn.new('white'))
+test_board_4.populate_space(:f8, Rook.new('white'))
+test_board_4.populate_space(:f6, Bishop.new('black'))
+test_board_4.populate_space(:a1, King.new('black'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
+puts "checkmate test 7"
+test_board_4 = Board.new
+test_board_4.populate_space(:d1, King.new('white'))
+test_board_4.populate_space(:d2, Pawn.new('black'))
+test_board_4.populate_space(:c2, Pawn.new('black'))
+test_board_4.populate_space(:d3, King.new('black'))
+test_board_4.populate_space(:a1, King.new('black'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
+puts "checkmate test 8"
+test_board_4 = Board.new
+test_board_4.populate_space(:e7, Knight.new('black'))
+test_board_4.populate_space(:f7, Pawn.new('white'))
+test_board_4.populate_space(:g7, Pawn.new('white'))
+test_board_4.populate_space(:h7, King.new('white'))
+test_board_4.populate_space(:h3, Rook.new('black'))
+test_board_4.populate_space(:a1, King.new('black'))
+g.game_board = test_board_4
+g.game_board.display_board
+puts g.update_game_status(:white)
+puts 
+puts 
+puts 
 
 
 

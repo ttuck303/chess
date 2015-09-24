@@ -522,5 +522,9 @@ How it should work:
 			
 
 
-
+testing refactored code, but had a thought about speeding up the checkmate check:
+1. when the source of the threat is located, it gives a hint that can narrow your search field
+ie if a ranged attacker is threatening, you know that you can't be in the line of fire, which eliminates 2 spaces to check... IMPACT: MINOR
+2. you can speed up the in check method by providing the optional enemies and vacancies packets! IMPACT: MAJOR
+	... or can you? because often times you are evaluating a totally new position. Let's see if there is a case where you can, after you are finished checking out the current situation.
 
