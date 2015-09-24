@@ -528,3 +528,9 @@ ie if a ranged attacker is threatening, you know that you can't be in the line o
 2. you can speed up the in check method by providing the optional enemies and vacancies packets! IMPACT: MAJOR
 	... or can you? because often times you are evaluating a totally new position. Let's see if there is a case where you can, after you are finished checking out the current situation.
 
+refactored code to detect checkmates
+next up?
+check whole games for check and check mate
+then see to do list
+
+

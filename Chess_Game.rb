@@ -687,6 +687,20 @@ class Chess_Game
 		end
 		return flag
 	end
+
+	def select_pawn_promotion
+		puts "Please select a piece to replace your pawn from:"
+		puts "1 - Queen"
+		puts "2 - Knight"
+		puts "3 - Bishop"
+		puts "4 - Rook"
+		choice = gets.strip.to_i
+		unless (1..4).include?(choice)
+			puts "Please try again."
+			select_pawn_promotion
+		end
+		return choice
+	end
 					
 
 
