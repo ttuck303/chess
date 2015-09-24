@@ -192,6 +192,7 @@ class Chess_Game
 		make_simple_move(piece_origin, piece_destination, piece_to_move)
 
 		if in_check?(@active_player)
+			puts "This move leaves you in check."
 			restore_prev_board_state
 			move_piece_loop
 		else
@@ -437,6 +438,7 @@ class Chess_Game
 			if is_proximity_threat
 				threatening_piece = temp[1]
 				threat_space = temp[2]
+				puts "#{kings_team.capitalize} is in check!"
 				@game_status = :in_check
 			end
 		end
@@ -449,12 +451,14 @@ class Chess_Game
 			if gap_threat
 				threatening_piece = temp[1]
 				threat_space = temp[2]
+				puts "#{kings_team.capitalize} is in check!"
 				@game_status = :in_check
 			end
 		end
 		puts "evaluating knights nearby..."  if @debug
 		if knights_nearby[0]
 			puts "determined kings nearby"  if @debug
+			puts "#{kings_team.capitalize} is in check!"
 			@game_status = :in_check
 			threatening_piece = knights_nearby[1]
 			threat_space = knights_nearby[2]
@@ -464,6 +468,7 @@ class Chess_Game
 		if @game_status == :in_check
 			if !(can_move_king?(kings_team, kings_location, vacancies) || can_obstruct_or_destroy_threat?(kings_team, kings_location, threat_space) )
 				puts "found check m8 to be true" if @debug
+				puts "#{@active_player.capitalize} puts #{kings_team} in checkmate!"
 				@game_status = :checkmate
 			end
 		end
