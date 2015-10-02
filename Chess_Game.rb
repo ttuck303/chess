@@ -111,17 +111,24 @@ class Chess_Game
 	end
 
 	def enter_desired_move
-		puts "Where do you want to move? (Enter o to select another piece to move)."
+		puts "Where do you want to move?"
+		puts "Enter the space (ie 'b4')"
+		puts "Enter o' to select another piece to move"
+		puts "Enter 'cr' to castle right or 'cl' to castle left"
 		choice = gets.strip.to_sym
 	end
 
 	def valid_move_selection?(origin, move, piece)
 		puts "Entering valid_move_selection? for piece #{piece.type} #{piece.object_id} in space #{origin} to space #{move}" if @debug
 
-		if !on_board?(move)				# check that the move is on the board
+		if move == :cl || move == :cr
+			return valid_castle_request?(origin, move, piece)
+		elsif move == :0
+			return true
+		elsif !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
 			return false
-		elsif space_occupied?(move) && enemies?(piece, get_piece_in_space(move))   	# check that the desired space is not occupied by a teammate
+		elsif space_occupied?(move) && !enemies?(piece, get_piece_in_space(move))   	# check that the desired space is not occupied by a teammate
 			puts "That space is occupied by your team. Please try again."
 			return false
 		elsif !allowed_piece_movement?(origin, move, piece)  # check that the move abides by the piece's move rules (on an open board)
@@ -136,12 +143,84 @@ class Chess_Game
 		end
 	end
 
+	def valid_castle_request?(origin, move, piece)
+		if piece.moved
+			puts "King has already moved, cannot castle."
+			return false
+		end
+
+		team = piece.team
+		rook = nil
+		spaces_covered = nil
+
+		if team == :black
+			if move == :cl
+				rook = get_piece_in_space(:a8)
+				spaces_covered = [:d8,:c8,:b8]
+			elsif move == :cr
+				rook = get_piece_in_space(:h8)
+				spaces_covered = [:f8, :g8]
+			else
+				puts "Error detecting move"
+			end
+		elsif team == :white
+			if move == :cl
+				rook = get_piece_in_space(:a1)
+				spaces_covered = [:d1, :c1, :b1]
+			elsif move == :cr
+				rook = get_piece_in_space(:h1)
+				spaces_covered = [:f1, :g1]
+			else
+				puts "Error detecting move"
+			end
+		else
+			puts "Error detecting team."
+		end
+
+		if rook.type != :rook || rook.team == team 
+			puts "Invalid set up to castle in that direction"
+			return false
+		end
+
+		if rook.moved
+			puts "Rook has already moved"
+			return false
+		end
+
+		if in_check?(team)
+			puts "Cannot castle when in check."
+			return false
+		end
+		stash_in_purgatory(origin, move, piece)
+		spaces_covered.each do |space|
+			if space_occupied?(space)
+				puts "Spaces between king and rook must be unoccupied to castle."
+				restore_prev_board_state
+				return false
+			elsif 
+				make_simple_move(origin, space, piece)
+				if in_check?(team)
+					puts "Cannot move through check"
+					restore_prev_board_state
+					return false
+				end
+			end
+		end
+		restore_prev_board_state
+		return true
+	end
+
+	def stalemate?
+
+	end
+
+
 	def enemies?(attacking_piece, defending_piece)
 		puts if @debug
 		puts "entering enemies? method" if @debug
 		puts "checking #{attacking_piece} with team #{attacking_piece.team}" if @debug
 		puts "against #{defending_piece} with team #{defending_piece.team} " if @debug
-		attacking_piece.team == defending_piece.team
+		attacking_piece.team != defending_piece.team
 	end
 
 	def allowed_piece_movement?(origin, move, piece)
@@ -192,20 +271,53 @@ class Chess_Game
 		end
 		piece_to_move = get_piece_in_space(piece_origin)
 		piece_destination = enter_desired_move
-		move_piece_loop if piece_destination == 'o' #escape the current piece selection
 		if !valid_move_selection?(piece_origin, piece_destination, piece_to_move)
 			piece_destination = enter_desired_move until valid_move_selection?(piece_origin, piece_destination, piece_to_move)
 		end
+		move_piece_loop if piece_destination == :o #escape the current piece selection
 
-		stash_in_purgatory(piece_origin, piece_destination, piece_to_move)
-		make_simple_move(piece_origin, piece_destination, piece_to_move)
-
-		if in_check?(@active_player)
-			puts "This move leaves you in check."
-			restore_prev_board_state
-			move_piece_loop
+		if piece_destination == :cl || piece_destination ==:cr
+			rook = nil
+			if active_player == :white
+				if piece_destination == :cl 
+					make_simple_move(piece_origin, :b1, piece_to_move)
+					rook = get_piece_in_space(:a1)
+					make_simple_move(:a1, :c1, rook)
+					rook.moved!
+					piece_to_move.moved!
+				elsif piece_destination == :cr
+					make_simple_move(piece_origin, :g1, piece_to_move)
+					rook = get_piece_in_space(:h1)
+					make_simple_move(:h1, :f1, rook)
+					rook.moved!
+					piece_to_move.moved!
+				end
+			elsif active_player == :black
+				if piece_destination == :cl
+					make_simple_move(piece_origin, :b8, piece_to_move)
+					rook = get_piece_in_space(:a8)
+					make_simple_move(:a8, :c8, rook)
+					rook.moved!
+					piece_to_move.moved!
+				elsif piece_destination == :cr
+					make_simple_move(piece_origin, :g8, piece_to_move)
+					rook = get_piece_in_space(:h8)
+					make_simple_move(:h8, :f8, rook)
+					rook.moved!
+					piece_to_move.moved!
+				end
+			end
 		else
-			finalize_move
+			stash_in_purgatory(piece_origin, piece_destination, piece_to_move)
+			make_simple_move(piece_origin, piece_destination, piece_to_move)
+
+			if in_check?(@active_player)
+				puts "This move leaves you in check."
+				restore_prev_board_state
+				move_piece_loop
+			else
+				finalize_move
+			end
 		end
 	end
 
@@ -297,8 +409,8 @@ class Chess_Game
 				puts "Illegal Move: pawn can only move diagonally when taking an opponent."
 				return true
 			end
-			# if pawn moves into last space, generate new piece for that team
 		end
+
 
 	end
 
@@ -750,27 +862,12 @@ class Chess_Game
 		add_piece_to_tracker(new_piece)
 	end
 
-
-
-
-
-		# check 8th row for white pawns
-		# check 1st row for black pawns 
-
-
-					
-
-
 end
 
 
 g = Chess_Game.new
 test_board = Board.new
-test_board.populate_space(:a7, Pawn.new('white'))
-test_board.populate_space(:e8, King.new('black'))
-test_board.populate_space(:e1, King.new('white'))
-g.game_board = test_board
-g.game_loop
+
 
 
 

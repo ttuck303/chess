@@ -533,4 +533,60 @@ next up?
 check whole games for check and check mate
 then see to do list
 
+-----
+9/24/2015
+
+In the home stretch, I can feel it (maybe). 
+
+Let's write in some special cases:
+	when a pawn reaches the opposite end, it becomes any piece desired by the player
+		when a pawn moves, get its space, and if the color + row combination is a certain type,
+		invite the player to suggest a piece - DONE
+	ability to castle...
+
+	castling violates king's normal move patterns, so we need some way to bypass that
+		conditions for castling
+			king has not moved
+			rook has not moved
+			no pieces in between king and rook
+			king is not in check
+			king will not move into check
+			The king does not pass through a square that is attacked by an enemy piece
+	... this is begining to look like a nightmare to program.. Asian chess doesn't allow castling - maybe thats an excuse for not programming it >:D
+
+		you could modify the allowable_move method in piece to allow 2 to the right or left, and then check the rest of the condition in special_cases
+
+	Screw it, I will come back later (if I feel like it)
+	The more significant feature I want to work on now is game logging, which will allow loading and saving of games, and potentially allow me to play out full games by entering game history
+		I want it to be able to store in a human readable form (ie a4 -> b5) as well as the more complicated chess notation (mainly because it will allow me to import famous games)
+----
+
+10/2/2015
+
+Back at it after a couple weeks!
+
+Four main tasks remain (at least):
+1. castling
+2. stalemate
+3. game history
+4. save/load
+
+Castling:
+started in on this. Here is how I think it could work:
+User indicates they want to castle by entering 'cl' or 'cr' into move collection method. Based on which team asks this, you should be able to determine which board spaces need investigation, since the colors are always on the same side of the board (in this variation of the game). 
+In legal_move?, call a separate method (castle_okay? or something like that) that will run all the checks needed for a castle. If this comes back true, return true and bypass the rest of the checks in legal moves. This means there will be some redundancy in legal_moves... so be it. 
+Executing the move should not be difficult, but it may require its own method, as simple_move or whatever its called only moves one piece. 
+
+Going to take a crack at this approach and report back. 
+
+The trickiest part about this is moving the king through the spaces and making sure its not in check. Here is how I am going to approach it:
+- order the spaces array in the order that the king would move through them
+- stash the current board state
+- while iterating over each space in the list
+	- first check that the space is empty (restore board state then return false if it isn't)
+	- move the king into the space anc run in_check? (restore board state and return false if its true)
+- after the iterations, restore board state (because the move loop will take care of actually moving the piece later)
+- this is the last test, so if it passes, return true
+
+
 
