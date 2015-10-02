@@ -600,5 +600,43 @@ Since this is only happening at this point in the code, might as well use a loca
 
 Fixed that glitch, and in the process messed up the "o" for selecting a new piece option. 
 
+-
+
+Okay so not the prettiest code but it works so far, so I am going to move on and refactor later when its all good. 
+
+Next up:
+checking for stalemate
+
+How to approach it?
+Checking all move possibilities for all active pieces seems... 
+Well, you would only need to check until you found a move that doesn't result in the active team being in check, so it probably wouldn't take that long actually. 
+Currently, don't have a method that generates all possible moves for a piece though.
+The acceptable_move? method in each piece type checks a proposed move, but does not generate. 
+One catch-all but computationally expensive way to do it would be to try moving every piece to every space on the board, using legal_move? on each combination. 
+The other problem is that we need to use stash and unstash again, and its used by in_check method. 
+
+Lets think about this.
+Stalemate is really just checkmate without being in check, so it should be able to recycle all the procedures from checkmate. Currently, thats all in one big block in update status. So ideally... 
+there would be
+in_check?
+mate?
+
+yes, yes => checkmate
+no, yes => stalemate
+no, no => normal
+
+This is not quite true, because the checkmate detection only looks at the three scenarios around the king: move the king, destroy the threat, block the threat. 
+
+Going to do it the dumb way:
+for each piece on player's team
+for each space on the board
+try to move the piece to the space
+if its legal and doesn't result in check
+	return false
+...
+end of loop
+restore board state
+return true
+
 
 

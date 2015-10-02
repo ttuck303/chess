@@ -231,7 +231,26 @@ class Chess_Game
 	end
 
 	def stalemate?
+		puts "entering stalemate detection" if @debug
+		team = nil
+		(@active_player == :white) ? (team = @white_pieces) : (team = @black_pieces)
 
+		team.each do |piece|
+			origin = locate_piece(piece)
+			@game_board.board.each do |space|
+				if valid_move_selection?(origin, space, piece)
+					stashed_game_state = [origin, space, piece]
+					make_simple_move(origin, space, piece)
+					if !in_check?
+						undo_simple_move(stashed_game_state)
+						return false
+					end
+					undo_simple_move(stashed_game_state)
+				end
+			end
+		end
+		puts "Detected stalemate."
+		return true
 	end
 
 
@@ -629,6 +648,9 @@ class Chess_Game
 				puts "#{@active_player.capitalize} puts #{kings_team} in checkmate!"
 				@game_status = :checkmate
 			end
+		elsif @game_status == :normal
+			puts "entering stalemate check" if @debug
+			@game_status = :stalemate if stalemate?
 		end
 		puts "game status = #{@game_status}, threatening_piece = #{threatening_piece} from #{threat_space}" if @debug
 
@@ -885,15 +907,17 @@ class Chess_Game
 		add_piece_to_tracker(new_piece)
 	end
 
+
+
 end
 
 
 g = Chess_Game.new
 test_board = Board.new
-test_board.populate_space(:a1, Rook.new('white'))
-test_board.populate_space(:e1, King.new('white'))
-test_board.populate_space(:e8, King.new('black'))
-test_board.populate_space(:a8, Rook.new('black'))
+
+test_board.populate_space(:f7, King.new('white'))
+test_board.populate_space(:h8, King.new('black'))
+test_board.populate_space(:g5, Queen.new('white'))
 g.game_board = test_board
 g.game_loop
 
