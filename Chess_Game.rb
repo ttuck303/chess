@@ -127,8 +127,8 @@ class Chess_Game
 
 		if move == :cl || move == :cr
 			return valid_castle_request?(origin, move, piece)
-		elsif move == :o
-			return true
+		#elsif move == :o
+		#	return true
 		elsif !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
 			return false
@@ -291,10 +291,13 @@ class Chess_Game
 		end
 		piece_to_move = get_piece_in_space(piece_origin)
 		piece_destination = enter_desired_move
-		if !valid_move_selection?(piece_origin, piece_destination, piece_to_move)
-			piece_destination = enter_desired_move until valid_move_selection?(piece_origin, piece_destination, piece_to_move)
-		end
 		move_piece_loop if piece_destination == :o #escape the current piece selection
+		if !valid_move_selection?(piece_origin, piece_destination, piece_to_move)
+			until valid_move_selection?(piece_origin, piece_destination, piece_to_move)
+				piece_destination = enter_desired_move
+				return move_piece_loop if piece_destination == :o
+			end
+		end
 
 		if piece_destination == :cl || piece_destination ==:cr
 			rook = nil
