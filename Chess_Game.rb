@@ -2,6 +2,8 @@ require_relative 'Board'
 require_relative 'Piece'
 require_relative 'Pawn'
 require_relative 'King'
+require_relative 'History'
+require 'yaml'
 
 class Chess_Game
 	attr_accessor :active_player, :game_board #board is temp for debugging
@@ -12,14 +14,36 @@ class Chess_Game
 
 	def initialize
 		@debug = true # switches debugging print lines on or off
-		@active_player = :white
-		@game_board = Board.new
-		#populate_new_board #commented out for debugging
+		game_type = prompt_new_or_load_game
 		@purgatory = {}
 		clear_purgatory
 		@white_pieces, @black_pieces = [], []
+		if game_type == 1
+			@active_player = :white
+			@game_board = Board.new
+			populate_new_board #commented out for debugging
+			@game_status = :normal
+			@log = History.new
+		elsif game_type == 2
+			game_info = load_game
+			@game_board = game_info[0]
+			@active_player = game_info[1]
+			@game_status = game_info[2]
+			@log = game_info[3]
+		end
 		populate_team_tracker
-		@game_status = :normal
+	end
+
+	def prompt_new_or_load_game
+		puts "Would you like to load a game or start a new game?"
+		puts '1 - New Game'
+		puts '2 - Load Game'
+		choice = gets.to_i
+		if choice != 1 && choice != 2
+			puts "Please enter 1 or 2"
+			return prompt_new_or_load_game
+		end
+		return choice
 	end
 
 	def populate_new_board #TO DO: refactor to be more concise
@@ -195,14 +219,18 @@ class Chess_Game
 			puts "Cannot castle when in check."
 			return false
 		end
+
 		stashed_game_state = [origin, nil, piece]
 		spaces_covered.each do |space|
+			puts "investigating space #{space}" if @debug
 			stashed_game_state[1] = space
+
 			if space_occupied?(space)
+				puts "found space #{space} to be occupied" if @debug
 				puts "Spaces between king and rook must be unoccupied to castle."
-				undo_simple_move(stashed_game_state)
 				return false
 			else
+				puts "founds space #{space} to be empty" if @debug
 				make_simple_move(origin, space, piece)
 				if in_check?(team)
 					puts "Cannot move through check"
@@ -212,7 +240,6 @@ class Chess_Game
 				undo_simple_move(stashed_game_state)
 			end
 		end
-		undo_simple_move(stashed_game_state)
 		return true
 	end
 
@@ -234,13 +261,17 @@ class Chess_Game
 		puts "entering stalemate detection" if @debug
 		team = nil
 		(@active_player == :white) ? (team = @white_pieces) : (team = @black_pieces)
-
+		puts "active team = #{@active_player}" if @debug
 		team.each do |piece|
+			puts "inspecting moves for piece #{piece}" if @debug
 			origin = locate_piece(piece)
+			puts "found piece in space #{origin}" if @debug
 			@game_board.board.each do |space|
-				if valid_move_selection?(origin, space, piece)
-					stashed_game_state = [origin, space, piece]
-					make_simple_move(origin, space, piece)
+				puts "investigating space #{space[0]}" if @debug
+
+				if valid_move_selection?(origin, space[0], piece)
+					stashed_game_state = [origin, space[0], piece]
+					make_simple_move(origin, space[0], piece)
 					if !in_check?
 						undo_simple_move(stashed_game_state)
 						return false
@@ -276,10 +307,6 @@ class Chess_Game
 
 	def on_board?(selection)
 		@game_board.on_board?(selection)
-	end
-
-	def space_occupied?(selection)
-		!(@game_board[selection].nil?)
 	end
 
 	def selection_is_on_active_team?(selection) #TODO squash bug: test 5 is finding check mate because its wrongly identifying the move where the king takes the queen as cannibalism
@@ -363,12 +390,24 @@ class Chess_Game
 		end
 	end
 
+	def save_game_prompt
+		puts "Would you like to save the game?"
+		puts "1 - Yes"
+		puts "2 - No"
+		choice = gets.to_i
+		if choice == 1
+			save_game
+		end
+	end
+
 	def game_loop
 		until game_over?
 			move_piece_loop
 			check_pawn_promotion
 			update_game_status(other_team(@active_player))
+			@log.print_log
 			switch_team
+			save_game_prompt
 		end
 	end
 
@@ -407,6 +446,8 @@ class Chess_Game
 			eliminate_piece_from_match(piece)
 		end
 		@purgatory[:attacking_piece].moved!
+		@log.log_move(@active_player, @purgatory[:attacking_piece_origin], @purgatory[:attacking_piece_move], @purgatory[:at
+			], @game_status)
 		clear_purgatory
 	end
 
@@ -526,9 +567,62 @@ class Chess_Game
 	end
 
 	def save_game
+		game_info = [@game_board, @active_player, @game_status, @log]
+		file_path = "saved_games"
+		Dir.mkdir(file_path) if !Dir.exists?(file_path)
+		compressed_game_info = YAML.dump(game_info)
+		time_stamp = Time.now.to_s 
+		existing_game_count = Dir.entries("#{Dir.pwd}/#{file_path}").size
+		file_name = "Chess - #{existing_game_count} - #{time_stamp}"
+		save_file = File.new("#{file_path}/#{file_name}", 'w')
+		save_file.write(compressed_game_info)
+		save_file.close
+		puts "Saved game successfully."
 	end
 
-	def load_game
+	def load_game(game_path="saved_games")
+		saved_games = get_saved_games(game_path)
+		prompt_with_game_list(saved_games)
+		user_selection = get_and_check_user_input_loading(saved_games.size)
+		saved_game_file = File.open("#{Dir.pwd}/#{game_path}/#{saved_games[user_selection]}", "r")
+		puts "saved_game_file #{saved_game_file}"
+		unwrapped_game_state = YAML.load(saved_game_file)
+		puts "unwrapped_game_state #{unwrapped_game_state}"
+		unwrapped_game_state
+
+	end
+
+	def get_saved_games(game_path = "saved_games", regex_criteria = "Chess - ")
+		output = []
+		existing_games = Dir.entries("#{Dir.pwd}/#{game_path}")
+		existing_games.each { |fname| output << fname if fname.match(regex_criteria)}
+		output.sort
+	end
+
+	def prompt_with_game_list(games)
+		puts "Enter the number of the game file you would like to load: "
+		games.each_with_index {|game, idx| puts "#{idx} : #{game}"}
+		puts
+	end
+
+	def get_and_check_user_input_loading(list_length)
+		user_input = gets.strip.to_i
+		puts "You selected #{user_input}"
+		return user_input if (0..list_length-1).include?(user_input)
+		puts "Illegal entry, please try another number..."
+		get_and_check_user_input_loading(list_length)
+	end
+
+	def select_game
+
+		choice = gets.strip.to_i
+		puts "You chose number #{choice}, #{saved_games[choice]}"
+		#return the choice as a File
+		saved_game_file = File.open("#{Dir.pwd}/saved_games/#{saved_games[choice]}", "r")
+		#load the yaml of the file
+		saved_yaml_file = YAML.load(saved_game_file)
+		puts saved_yaml_file
+
 	end
 
 
@@ -907,19 +1001,14 @@ class Chess_Game
 		add_piece_to_tracker(new_piece)
 	end
 
-
-
 end
 
 
 g = Chess_Game.new
-test_board = Board.new
-
-test_board.populate_space(:f7, King.new('white'))
-test_board.populate_space(:h8, King.new('black'))
-test_board.populate_space(:g5, Queen.new('white'))
-g.game_board = test_board
 g.game_loop
+
+
+
 
 
 

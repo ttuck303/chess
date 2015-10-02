@@ -638,5 +638,34 @@ end of loop
 restore board state
 return true
 
+-
+Stalemate detection works! 
+
+now, game history
+
+I think I should create a new class for this
+At first, the class will stash each completed move in terms that my program can read
+Then, it will include a method to translate each move to the algebraic notation
+
+What fields do I need to capture?
+
+turn, active_team, origin, move, piece, game_state
+I've seen it done where 1 turn = each team moving once, but in this case it is easier to just make a turn = a single team making a move
+
+put in a quick solution
+one problem (so far): the move completes, which clears the purgatory, and then the game state updates. So the game state is not really reflecting what happened at the end of that turn. What should it represent? The state before the move or the state after the move? Do we even need to keep track of game state? I think so, because I believe (thought I could be wrong) that in algebraic notation, there is a special indicator for things like check. 
+Going to leave it as is, and say that it represents pre-move game state. 
+
+- 
+Have some game history, now, saving and loading. 
+
+to save a game, we would have to stash all of the game state variables, compress into yaml, then write to a fil
+
+for loading a game, its the opposite
+
+so, for saving, what exactly do we need?
+the board with the alive pieces (can populate team arrays after loading), the turn, the game state
+
+
 
 
