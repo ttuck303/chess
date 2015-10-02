@@ -5,8 +5,8 @@ class History
 		@game_log = []
 	end
 
-	def log_move(team, origin, move, piece, game_state)
-		@game_log << [team, origin, move, piece, game_state]
+	def log_move(team, origin, move, piece_type, game_state)
+		@game_log << [team, origin, move, piece_type, game_state]
 	end
 
 	def print_log
@@ -15,6 +15,6 @@ class History
 		end
 	end
 
-	
+
 
 end

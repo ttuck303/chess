@@ -376,6 +376,7 @@ class Chess_Game
 					piece_to_move.moved!
 				end
 			end
+			@log.log_move(@active_player, piece_origin, piece_destination, piece_to_move.type, @game_status)
 		else
 			stash_in_purgatory(piece_origin, piece_destination, piece_to_move)
 			make_simple_move(piece_origin, piece_destination, piece_to_move)
@@ -446,8 +447,7 @@ class Chess_Game
 			eliminate_piece_from_match(piece)
 		end
 		@purgatory[:attacking_piece].moved!
-		@log.log_move(@active_player, @purgatory[:attacking_piece_origin], @purgatory[:attacking_piece_move], @purgatory[:at
-			], @game_status)
+		@log.log_move(@active_player, @purgatory[:attacking_piece_origin], @purgatory[:attacking_piece_move], @purgatory[:attacking_piece].type, @game_status)
 		clear_purgatory
 	end
 
