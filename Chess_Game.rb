@@ -11,8 +11,8 @@ class Chess_Game
 	DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
 
 	def initialize
-		@debug = false # switches debugging print lines on or off
-		@active_player = :black
+		@debug = true # switches debugging print lines on or off
+		@active_player = :white
 		@game_board = Board.new
 		#populate_new_board #commented out for debugging
 		@purgatory = {}
@@ -84,9 +84,13 @@ class Chess_Game
 	end
 
 	def make_simple_move(origin, move, piece)
+		puts "before move:" if @debug
+		display_board if @debug
 		puts "making simple move #{piece} from #{origin} to #{move}" if @debug
 		@game_board.populate_space(move, piece)
 		@game_board.empty_space(origin)
+		puts "after move:" if @debug
+		display_board if @debug
 	end
 
 
@@ -123,7 +127,7 @@ class Chess_Game
 
 		if move == :cl || move == :cr
 			return valid_castle_request?(origin, move, piece)
-		elsif move == :0
+		elsif move == :o
 			return true
 		elsif !on_board?(move)				# check that the move is on the board
 			puts "The space you have selected is not on the board. Please try again."
@@ -155,20 +159,20 @@ class Chess_Game
 
 		if team == :black
 			if move == :cl
-				rook = get_piece_in_space(:a8)
+				rook = get_piece_in_space(:a8) if space_occupied?(:a8)
 				spaces_covered = [:d8,:c8,:b8]
 			elsif move == :cr
-				rook = get_piece_in_space(:h8)
+				rook = get_piece_in_space(:h8) if space_occupied?(:h8)
 				spaces_covered = [:f8, :g8]
 			else
 				puts "Error detecting move"
 			end
 		elsif team == :white
 			if move == :cl
-				rook = get_piece_in_space(:a1)
+				rook = get_piece_in_space(:a1) if space_occupied?(:a1)
 				spaces_covered = [:d1, :c1, :b1]
 			elsif move == :cr
-				rook = get_piece_in_space(:h1)
+				rook = get_piece_in_space(:h1) if space_occupied?(:h1)
 				spaces_covered = [:f1, :g1]
 			else
 				puts "Error detecting move"
@@ -177,7 +181,7 @@ class Chess_Game
 			puts "Error detecting team."
 		end
 
-		if rook.type != :rook || rook.team == team 
+		if rook == nil || rook.type != :rook || rook.team != team 
 			puts "Invalid set up to castle in that direction"
 			return false
 		end
@@ -191,23 +195,39 @@ class Chess_Game
 			puts "Cannot castle when in check."
 			return false
 		end
-		stash_in_purgatory(origin, move, piece)
+		stashed_game_state = [origin, nil, piece]
 		spaces_covered.each do |space|
+			stashed_game_state[1] = space
 			if space_occupied?(space)
 				puts "Spaces between king and rook must be unoccupied to castle."
-				restore_prev_board_state
+				undo_simple_move(stashed_game_state)
 				return false
-			elsif 
+			else
 				make_simple_move(origin, space, piece)
 				if in_check?(team)
 					puts "Cannot move through check"
-					restore_prev_board_state
+					undo_simple_move(stashed_game_state)
 					return false
 				end
+				undo_simple_move(stashed_game_state)
 			end
 		end
-		restore_prev_board_state
+		undo_simple_move(stashed_game_state)
 		return true
+	end
+
+	def undo_simple_move(args)
+		puts "calling undo_simple_move" if @debug
+		puts "before call board: " if @debug
+		display_board if @debug
+		origin = args[0]
+		move = args[1]
+		piece = args[2]
+
+		@game_board.populate_space(origin, piece)
+		@game_board.empty_space(move)
+		puts "after call board: " if @debug
+		display_board if @debug
 	end
 
 	def stalemate?
@@ -867,7 +887,12 @@ end
 
 g = Chess_Game.new
 test_board = Board.new
-
+test_board.populate_space(:a1, Rook.new('white'))
+test_board.populate_space(:e1, King.new('white'))
+test_board.populate_space(:e8, King.new('black'))
+test_board.populate_space(:a8, Rook.new('black'))
+g.game_board = test_board
+g.game_loop
 
 
 

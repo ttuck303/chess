@@ -588,5 +588,17 @@ The trickiest part about this is moving the king through the spaces and making s
 - after the iterations, restore board state (because the move loop will take care of actually moving the piece later)
 - this is the last test, so if it passes, return true
 
+Ran into problem
+in_check? already uses purgatory, and my method for seeing if castling is okay is also using the same variables, meaning its getting messed up and stashing/restoring improperly
+
+solutions:
+1. use a different local variable to do the same thing as stash
+2. use a different global variable to do the same thing as stash
+
+Since this is only happening at this point in the code, might as well use a local var.
+
+
+Fixed that glitch, and in the process messed up the "o" for selecting a new piece option. 
+
 
 
