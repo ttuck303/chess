@@ -368,6 +368,32 @@ b.populate_space(:f7, King.new('white'))
 b.populate_space(:h8, King.new('black'))
 b.populate_space(:g5, Queen.new('white'))
 
+# Stalemate 2, move f5 -> f6
+b.populate_space(:f8, King.new('black'))
+b.populate_space(:f7, Pawn.new('white'))
+b.populate_space(:f5, King.new('white'))
+
+# Stalemate 3, move b5 -> b6
+b.populate_space(:a8, King.new('black'))
+b.populate_space(:b8, Bishop.new('black'))
+b.populate_space(:h8, Rook.new('white'))
+b.populate_space(:b5, King.new('white'))
+
+# Stalemate 4, move d4 -> c3
+b.populate_space(:a1, King.new('black'))
+b.populate_space(:b2, Rook.new('white'))
+b.populate_space(:d4, King.new('white'))
+
+# Stalemate 5, move b4 -> b3
+b.populate_space(:a1, King.new('black'))
+b.populate_space(:b4, Queen.new('white'))
+b.populate_space(:h8, King.new('white'))
+
+# Stalemate 6, move a5 -> a6
+b.populate_space(:a8, King.new('black'))
+b.populate_space(:a7, Pawn.new('white'))
+b.populate_space(:a5, King.new('white'))
+b.populate_space(:f4, Bishop.new('white'))
 
 
 =end

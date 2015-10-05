@@ -1015,9 +1015,10 @@ end
 
 g = Chess_Game.new
 b = Board.new
-b.populate_space(:f8, King.new('black'))
-b.populate_space(:f7, Pawn.new('white'))
-b.populate_space(:f5, King.new('white'))
+b.populate_space(:a8, King.new('black'))
+b.populate_space(:a7, Pawn.new('white'))
+b.populate_space(:a5, King.new('white'))
+b.populate_space(:f4, Bishop.new('white'))
 g.game_board = b
 g.game_loop
 
