@@ -361,6 +361,18 @@ puts
 
 =end
 
+=begin
+	
+# Stalemate 1, move g5->g6
+b.populate_space(:f7, King.new('white'))
+b.populate_space(:h8, King.new('black'))
+b.populate_space(:g5, Queen.new('white'))
+
+
+
+=end
+
+
 
 
 

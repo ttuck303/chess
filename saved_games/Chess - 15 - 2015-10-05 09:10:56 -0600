@@ -1,0 +1,311 @@
+---
+- !ruby/object:Board
+  board:
+    :a1: 
+    :a2: !ruby/object:Pawn
+      team: :white
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :a3: 
+    :a4: !ruby/object:Queen
+      team: :white
+      moved: true
+      alive: true
+      type: :queen
+      symbol: "♕"
+    :a5: !ruby/object:Pawn
+      team: :black
+      moved: true
+      alive: true
+      type: :pawn
+      symbol: "♟"
+    :a6: !ruby/object:Bishop
+      team: :black
+      moved: true
+      alive: true
+      type: :bishop
+      symbol: "♝"
+    :a7: 
+    :a8: 
+    :b1: !ruby/object:King
+      team: :white
+      moved: true
+      alive: true
+      type: :king
+      symbol: "♔"
+    :b2: !ruby/object:Pawn
+      team: :white
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :b3: 
+    :b4: 
+    :b5: 
+    :b6: !ruby/object:Pawn
+      team: :black
+      moved: true
+      alive: true
+      type: :pawn
+      symbol: "♟"
+    :b7: !ruby/object:Queen
+      team: :black
+      moved: true
+      alive: true
+      type: :queen
+      symbol: "♛"
+    :b8: !ruby/object:King
+      team: :black
+      moved: true
+      alive: true
+      type: :king
+      symbol: "♚"
+    :c1: !ruby/object:Rook
+      team: :white
+      moved: true
+      alive: true
+      type: :rook
+      symbol: "♖"
+    :c2: 
+    :c3: !ruby/object:Knight
+      team: :white
+      moved: true
+      alive: true
+      type: :knight
+      symbol: "♘"
+    :c4: !ruby/object:Pawn
+      team: :white
+      moved: true
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :c5: 
+    :c6: !ruby/object:Knight
+      team: :black
+      moved: true
+      alive: true
+      type: :knight
+      symbol: "♞"
+    :c7: !ruby/object:Pawn
+      team: :black
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♟"
+    :c8: !ruby/object:Rook
+      team: :black
+      moved: true
+      alive: true
+      type: :rook
+      symbol: "♜"
+    :d1: 
+    :d2: !ruby/object:Bishop
+      team: :white
+      moved: true
+      alive: true
+      type: :bishop
+      symbol: "♗"
+    :d3: 
+    :d4: !ruby/object:Pawn
+      team: :white
+      moved: true
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :d5: 
+    :d6: 
+    :d7: !ruby/object:Pawn
+      team: :black
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♟"
+    :d8: 
+    :e1: 
+    :e2: 
+    :e3: 
+    :e4: !ruby/object:Pawn
+      team: :white
+      moved: true
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :e5: !ruby/object:Pawn
+      team: :white
+      moved: true
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :e6: 
+    :e7: 
+    :e8: 
+    :f1: !ruby/object:Bishop
+      team: :white
+      moved: false
+      alive: true
+      type: :bishop
+      symbol: "♗"
+    :f2: 
+    :f3: 
+    :f4: 
+    :f5: 
+    :f6: 
+    :f7: !ruby/object:Pawn
+      team: :black
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♟"
+    :f8: !ruby/object:Bishop
+      team: :black
+      moved: false
+      alive: true
+      type: :bishop
+      symbol: "♝"
+    :g1: !ruby/object:Knight
+      team: :white
+      moved: false
+      alive: true
+      type: :knight
+      symbol: "♘"
+    :g2: !ruby/object:Pawn
+      team: :white
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :g3: 
+    :g4: 
+    :g5: 
+    :g6: 
+    :g7: !ruby/object:Pawn
+      team: :black
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♟"
+    :g8: !ruby/object:Knight
+      team: :black
+      moved: false
+      alive: true
+      type: :knight
+      symbol: "♞"
+    :h1: !ruby/object:Rook
+      team: :white
+      moved: false
+      alive: true
+      type: :rook
+      symbol: "♖"
+    :h2: !ruby/object:Pawn
+      team: :white
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♙"
+    :h3: 
+    :h4: 
+    :h5: 
+    :h6: 
+    :h7: !ruby/object:Pawn
+      team: :black
+      moved: false
+      alive: true
+      type: :pawn
+      symbol: "♟"
+    :h8: !ruby/object:Rook
+      team: :black
+      moved: false
+      alive: true
+      type: :rook
+      symbol: "♜"
+- :black
+- :normal
+- !ruby/object:History
+  game_log:
+  - - :white
+    - :f2
+    - :f4
+    - :pawn
+    - :normal
+  - - :black
+    - :a7
+    - :a5
+    - :pawn
+    - :normal
+  - - :white
+    - :c2
+    - :c4
+    - :pawn
+    - :normal
+  - - :black
+    - :b8
+    - :c6
+    - :knight
+    - :normal
+  - - :white
+    - :d1
+    - :a4
+    - :queen
+    - :normal
+  - - :black
+    - :b7
+    - :b6
+    - :pawn
+    - :normal
+  - - :white
+    - :d2
+    - :d4
+    - :pawn
+    - :normal
+  - - :black
+    - :c8
+    - :a6
+    - :bishop
+    - :normal
+  - - :white
+    - :e2
+    - :e4
+    - :pawn
+    - :normal
+  - - :black
+    - :e7
+    - :e5
+    - :pawn
+    - :normal
+  - - :white
+    - :c1
+    - :d2
+    - :bishop
+    - :normal
+  - - :black
+    - :d8
+    - :b8
+    - :queen
+    - :normal
+  - - :white
+    - :b1
+    - :c3
+    - :knight
+    - :normal
+  - - :black
+    - :b8
+    - :b7
+    - :queen
+    - :normal
+  - - :white
+    - :e1
+    - :cl
+    - :king
+    - :normal
+  - - :black
+    - :e8
+    - :cl
+    - :king
+    - :normal
+  - - :white
+    - :f4
+    - :e5
+    - :pawn
+    - :normal

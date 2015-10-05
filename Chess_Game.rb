@@ -21,7 +21,7 @@ class Chess_Game
 		if game_type == 1
 			@active_player = :white
 			@game_board = Board.new
-			populate_new_board #commented out for debugging
+			#populate_new_board #commented out for debugging
 			@game_status = :normal
 			@log = History.new
 		elsif game_type == 2
@@ -220,10 +220,12 @@ class Chess_Game
 			return false
 		end
 
+
 		stashed_game_state = [origin, nil, piece]
 		spaces_covered.each do |space|
 			puts "investigating space #{space}" if @debug
 			stashed_game_state[1] = space
+			stashed_game_state[3] = get_piece_in_space(space) if space_occupied?(space)
 
 			if space_occupied?(space)
 				puts "found space #{space} to be occupied" if @debug
@@ -250,9 +252,11 @@ class Chess_Game
 		origin = args[0]
 		move = args[1]
 		piece = args[2]
+		!args[3].nil? ? (victim = args[3]) : (victim = nil)
 
 		@game_board.populate_space(origin, piece)
 		@game_board.empty_space(move)
+		@game_board.populate_space(move, victim) if !victim.nil?
 		puts "after call board: " if @debug
 		display_board if @debug
 	end
@@ -260,9 +264,10 @@ class Chess_Game
 	def stalemate?
 		puts "entering stalemate detection" if @debug
 		team = nil
-		(@active_player == :white) ? (team = @white_pieces) : (team = @black_pieces)
-		puts "active team = #{@active_player}" if @debug
-		team.each do |piece|
+		(@active_player == :white) ? (team = :black) : (team = :white)
+		remaining_pieces = get_teams_remaining_pieces(team)
+		puts "active team = #{@active_player}, so checking #{team} for stalemate" if @debug
+		remaining_pieces.each do |piece|
 			puts "inspecting moves for piece #{piece}" if @debug
 			origin = locate_piece(piece)
 			puts "found piece in space #{origin}" if @debug
@@ -271,8 +276,10 @@ class Chess_Game
 
 				if valid_move_selection?(origin, space[0], piece)
 					stashed_game_state = [origin, space[0], piece]
+					stashed_game_state[3] = get_piece_in_space(space[0]) if space_occupied?(space[0])
+
 					make_simple_move(origin, space[0], piece)
-					if !in_check?
+					if !in_check?(team)
 						undo_simple_move(stashed_game_state)
 						return false
 					end
@@ -406,10 +413,12 @@ class Chess_Game
 			move_piece_loop
 			check_pawn_promotion
 			update_game_status(other_team(@active_player))
-			@log.print_log
 			switch_team
 			save_game_prompt
 		end
+		puts "Game Over."
+		puts "Game History:"
+		@log.print_log
 	end
 
 	def game_over?
@@ -1005,6 +1014,11 @@ end
 
 
 g = Chess_Game.new
+b = Board.new
+b.populate_space(:f8, King.new('black'))
+b.populate_space(:f7, Pawn.new('white'))
+b.populate_space(:f5, King.new('white'))
+g.game_board = b
 g.game_loop
 
 

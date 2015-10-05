@@ -10,8 +10,9 @@ class History
 	end
 
 	def print_log
+		puts '[team, origin, move, piece, game status]'
 		@game_log.each do |turn|
-			puts turn
+			puts turn.inspect
 		end
 	end
 

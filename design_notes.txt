@@ -667,5 +667,13 @@ so, for saving, what exactly do we need?
 the board with the alive pieces (can populate team arrays after loading), the turn, the game state
 
 
+----
+
+10/5/2015
+testing stalemate method again
+if white makes a move, and then updatestatus is run after that move, the stalemate check (which is a sub routine of update status) should really be run for team black. 
+
+glad I am checking it because I am finding many problems
+most recently: the stash game and undo simple move fails to restore pieces that were taken in a hypothetical move, must fix that
 
 
