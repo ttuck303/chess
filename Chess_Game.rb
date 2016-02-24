@@ -697,8 +697,8 @@ class Chess_Game
 	end
 
 	def update_game_status(kings_team = @active_player)
-		@game_status = :normal # ONLY FOR DEBUGGING SO WE CAN EVALUATE MID GAME SCENARIOS
-		populate_team_tracker # ONLY FOR DEBUGGING SO WE CAN EVALUATE MID GAME SCENARIOS
+		#@game_status = :normal # ONLY FOR DEBUGGING SO WE CAN EVALUATE MID GAME SCENARIOS
+		#populate_team_tracker # ONLY FOR DEBUGGING SO WE CAN EVALUATE MID GAME SCENARIOS
 		puts "game status = #{@game_status}" if @debug
 		puts "remaining white team = #{@white_pieces.inspect}" if @debug
 		puts "remaining black team = #{@black_pieces.inspect}" if @debug
@@ -1014,12 +1014,6 @@ end
 
 
 g = Chess_Game.new
-b = Board.new
-b.populate_space(:a8, King.new('black'))
-b.populate_space(:a7, Pawn.new('white'))
-b.populate_space(:a5, King.new('white'))
-b.populate_space(:f4, Bishop.new('white'))
-g.game_board = b
 g.game_loop
 
 
