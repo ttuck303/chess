@@ -13,7 +13,7 @@ class Chess_Game
 	DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
 
 	def initialize
-		@debug = true # switches debugging print lines on or off
+		@debug = false # switches debugging print lines on or off
 		game_type = prompt_new_or_load_game
 		@purgatory = {}
 		clear_purgatory
@@ -21,7 +21,7 @@ class Chess_Game
 		if game_type == 1
 			@active_player = :white
 			@game_board = Board.new
-			#populate_new_board #commented out for debugging
+			populate_new_board #commented out for debugging
 			@game_status = :normal
 			@log = History.new
 		elsif game_type == 2
